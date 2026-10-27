@@ -218,20 +218,20 @@ const SECTIONS = [
     ["Check you have the ECG supplies", `<ul><li>3 round ECG electrodes (EL503) per participant, plus spares</li><li><b>Spectra 360</b> electrode gel (for ECG only)</li><li>ECG lead with <b>three</b> wires: ${W}white, ${K}black, ${R}red (SS2L)</li></ul>` + `<div class="kitrow">` + fig("ecgElectrode", "A round ECG electrode (metal stud side up)", "small") + fig("spectraGel", "Spectra 360 gel (blue tube): for ECG only", "small") + `</div>`],
     ["Check you have the EDA supplies", `<ul><li>2 EDA electrodes (EL509) per participant, plus spares</li><li><b>Isotonic gel</b> (GEL101A) for EDA only</li><li>EDA lead with <b>two</b> wires: ${R}red and ${K}black (SS57L)</li><li>Medical tape</li></ul>` + call("Never swap the gels. Spectra 360 isn't made for skin conductance, so using it on the EDA electrodes changes the readings.", "warn") + `<div class="kitrow">` + fig("edaSheet", "A sheet of EDA electrodes", "mid") + fig("isoGel", "Isotonic gel (GEL101A): for EDA only", "small") + `</div>`],
     ["Check you have wipes and a bin", p("Water-based wet wipes and tissues for the end of the session.")],
+    ["Collect the debrief and payment sheets", p("From room <b>S5</b>, collect:") + `<ul><li>a <b>debrief sheet</b></li><li>the <b>payment sheet</b> participants sign to show they received their money</li><li><b>£1</b> for the participant ${todo("where the money is kept")}</li></ul>`],
     ["Prepare the 3 ECG electrodes", p("Participants are given the ECG electrodes <b>ready to stick on</b>, so do this now:") + `<ol><li>Peel the backing off each of the 3 ECG electrodes.</li><li>Check the gel in the middle isn't dry.</li><li>If it is dry, add a <b>small drop of Spectra 360</b>.</li><li>Lay them gel side up on a clean surface, ready to hand over.</li></ol>` + `<div class="kitrow">` + fig("ecgElectrode", "ECG electrode", "small") + fig("spectraGel", "Spectra 360 (blue tube): ECG only", "small") + `</div>`]
   ]},
   { id: "stim", title: "Stimulus PC", lede: "This is the computer the participant uses. It runs the PsychoPy experiment and the Qualtrics forms.", steps: [
-    ["Turn on the Stimulus PC and log in", p("Log in to the <b>Lab</b> account. Ask the lab manager for the password.")],
+    ["Turn on the Stimulus PC and log in", p("Log in to the <b>Lab</b> account. You'll be given the password separately.")],
     ["Set the volume", p("Set the system volume to <b>30</b>. The experiment starts with its own volume check, so the participant can adjust from there.")],
-    ["Open PsychoPy", `<ol><li>Double-click the <b>PsychoPy</b> shortcut on the desktop. It opens the Builder window.</li><li>Click <b>File → Open</b> and open:</li></ol>` + code("<repo folder>\\experiment\\task\\experiment_timing.psyexp") + p(todo("the repo folder on this PC, and whether this study runs experiment_timing or experiment_strategy")) + call("Never edit the experiment on this computer. If PsychoPy asks to save changes when you close it, choose <b>Don't save</b>.")],
+    ["Open PsychoPy", `<ol><li>Double-click the <b>PsychoPy</b> shortcut on the desktop. It opens the Builder window.</li><li>Click <b>File → Open</b> and go to:</li></ol>` + p("<b>This PC → Documents → Github → Emotion_Utility_Beliefs → experiment → task</b>") + p("Open <b>experiment_timing.psyexp</b>. " + todo("confirm whether this study runs experiment_timing or experiment_strategy")) + call("Never edit the experiment on this computer. If PsychoPy asks to save changes when you close it, choose <b>Don't save</b>.")],
     ["Open the information and consent form", p("Double-click the <b>INFOR &amp; CONSENT - EmoUtilityBelief</b> shortcut on the desktop. It opens the form in Qualtrics. Leave it on the first page.")],
     ["Open the demographics form", p("Double-click the <b>DEMOGRAPHICS - EmoUtilityBelief</b> shortcut on the desktop.") + p("Then switch back to the information and consent form, so that's what the participant sees first.")]
   ]},
   { id: "biopac", title: "Biopac PC and MP36", lede: "This computer records the physiology. Turn the MP36 on before you open the Biopac software, or the software won't find it.", steps: [
-    ["Turn on the Biopac PC and log in", p(todo("account name; ask the lab manager for the password"))],
-    ["Check the MP36 cables", p("At the back of the MP36, check the <b>USB cable</b> goes to the Biopac PC and the <b>power adapter</b> is plugged in.")],
+    ["Turn on the Biopac PC and log in", p("Log in to the <b>cm909</b> account. You'll be given the password separately.")],
     ["Turn on the MP36", p("Switch it on with the power switch on the back. The status light on the front should come on.")],
-    ["Open the Biopac software and the template", p("Open the Biopac software, then <b>File → Open</b> and open the template graph. It's in:") + p("<b>This PC → Documents → Emotion_Utility_Beliefs → template.gtl</b>") +
+    ["Open the Biopac software and the template", p("Open the Biopac software, then <b>File → Open</b> and open the template graph. It's in:") + p("<b>This PC → Documents → Carmen MD Emotion_Utility_Beliefs → Emotion_Utility_Beliefs_template.gtl</b>") +
       trouble("The software says it can't find the MP36", `<ol><li>Close the software.</li><li>Check the MP36 is switched on and the USB cable is pushed in at both ends.</li><li>Open the software again.</li></ol>`)]
   ]},
   { id: "arrival", title: "Participant arrival and consent", steps: [
@@ -279,7 +279,7 @@ const SECTIONS = [
   ]},
   { id: "run", title: "Questionnaire and experiment", lede: "Keep the Biopac recording running from now until the end of the experiment.", steps: [
     ["Open the demographics form", p("Switch to the demographics form you opened earlier.") + s("Next, please answer some questions about yourself. It takes a few minutes. Let me know when you've finished. I'll be just outside.")],
-    ["Agree the participant ID", p("Make sure the participant uses the same ID on the demographics form and in PsychoPy. " + todo("how the participant ID is made"))],
+    ["Agree the participant ID", p("Make sure the participant uses the same ID on the demographics form and in PsychoPy.")],
     ["Check the demographics form is complete", p("When they call you back, check Qualtrics has reached the end of the survey.")],
     ["Check the recording is still running", p("On the Biopac PC, check the traces are still moving and both signals still look good.")],
     ["Start the PsychoPy experiment", p("In PsychoPy, press the green <b>Run</b> button. A start-up box appears.")],
@@ -290,19 +290,20 @@ const SECTIONS = [
   ]},
   { id: "end", title: "End of session", steps: [
     ["Stop the recording", p("On the Biopac PC, press <b>Stop</b>.")],
-    ["Save the recording straight away", p("<b>File → Save As</b>, using the participant ID as the file name. " + todo("where to save it")) + call("Save before you do anything else. If the PC crashes before saving, the whole recording is lost.", "warn")],
+    ["Save the recording straight away", p("<b>File → Save As</b>, using the participant ID as the file name. Save it in:") + p("<b>This PC → Documents → Carmen MD Emotion_Utility_Beliefs → data</b>") + p("Don't save over the template.") + call("Save before you do anything else. If the PC crashes before saving, the whole recording is lost.", "warn")],
     ["Thank the participant", p("Tell them the experiment is finished and thank them.")],
     ["Ask them to remove the electrodes", s("You can take the sensors off now. Unclip the wires first, then take the tape off your fingers and gently peel off all the stickers.") + p("They remove both the EDA and ECG electrodes themselves. Step outside while they take off the ECG electrodes.")],
     ["Give them wipes", p("Hand them wet wipes or tissues to remove leftover gel.")],
     ["Bin the used electrodes", p("Electrodes, tape and wipes go in the <b>general waste bin</b>.")],
-    ["Debrief the participant", p("Give them the debrief sheet and time to read it. Answer any questions.") + p("The debrief explains that the information they were given about emotions and task performance was part of the study. Make sure they read it before they leave. " + todo("where the debrief sheet is kept"))],
-    ["Record credit or payment", p(todo("how course credit and the performance-based reward are recorded and paid"))],
+    ["Debrief the participant", p("Give them the debrief sheet and time to read it. Answer any questions.") + p("The debrief explains that the information they were given about emotions and task performance was part of the study. Make sure they read it before they leave.")],
+    ["Pay the participant", p("Give them <b>£1</b> and ask them to <b>sign the payment sheet</b> to show they've received it. Return the sheet to room <b>S5</b> after the session.")],
+    ["Record course credit", p(todo("how course credit is recorded"))],
     ["Show them out", p("Thank them again and show them out.")]
   ]},
   { id: "data", title: "Save the data", steps: [
     ["Check the participant ID", p("Use the ID from the PsychoPy start-up box for every file from this session.")],
-    ["Check the Biopac file", p("Check the recording you saved opens and has the participant ID as its name. " + todo("folder"))],
-    ["Copy the PsychoPy data", p("PsychoPy saves this participant's files in:") + code("<repo folder>\\experiment\\task\\data\\") + p("Copy them to " + todo("secure storage location") + ".") + call("Participant data never goes on GitHub. The data folder is set up so Git ignores it; don't move it or rename it.", "warn")],
+    ["Check the Biopac file", p("In <b>This PC → Documents → Carmen MD Emotion_Utility_Beliefs → data</b>, check the recording you saved is there, opens, and has the participant ID as its name.")],
+    ["Copy the PsychoPy data", p("PsychoPy saves this participant's files in:") + p("<b>This PC → Documents → Github → Emotion_Utility_Beliefs → experiment → task → data</b>") + p("Copy them to " + todo("secure storage location") + ".") + call("Participant data never goes on GitHub. The data folder is set up so Git ignores it; don't move it or rename it.", "warn")],
     ["Check Qualtrics", p("Nothing to save: the consent and demographics responses are stored in Qualtrics automatically. Close both forms so the next participant starts fresh.")],
     ["Close PsychoPy without saving", p("If PsychoPy asks to save changes, choose <b>Don't save</b>.")],
     ["Reset the room", p("Tidy the desk, put the leads back, and turn off the MP36 if this is the last session of the day.")],
