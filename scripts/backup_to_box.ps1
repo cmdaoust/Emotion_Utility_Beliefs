@@ -25,6 +25,7 @@ $RemoteRoot = '/Carmen MD PhD/Emotion_Utility_Beliefs'
 # ---------------------------------------------------------------------
 
 $Docs     = [Environment]::GetFolderPath('MyDocuments')
+if (-not $Docs) { $Docs = Join-Path $env:USERPROFILE 'Documents' }
 $CredFile = Join-Path $env:LOCALAPPDATA 'EmotionUtilityBeliefs\box_sftp_credential.xml'
 $LogDir   = Join-Path $Docs 'box_backup_logs'
 
@@ -54,12 +55,11 @@ function Show-Result {
 }
 
 function Find-WinScpDll {
-    $candidates = @(
-        (Join-Path ${env:ProgramFiles(x86)} 'WinSCP\WinSCPnet.dll'),
-        (Join-Path $env:ProgramFiles 'WinSCP\WinSCPnet.dll'),
-        (Join-Path $env:LOCALAPPDATA 'Programs\WinSCP\WinSCPnet.dll')
-    )
-    foreach ($c in $candidates) { if ($c -and (Test-Path $c)) { return $c } }
+    $bases = @(${env:ProgramFiles(x86)}, $env:ProgramFiles, (Join-Path $env:LOCALAPPDATA 'Programs')) | Where-Object { $_ }
+    foreach ($b in $bases) {
+        $c = Join-Path $b 'WinSCP\WinSCPnet.dll'
+        if (Test-Path $c) { return $c }
+    }
     return $null
 }
 

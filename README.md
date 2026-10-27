@@ -22,8 +22,8 @@ Emotion_Utility_Beliefs/
 │   └── click_to_continue.png
 ├── analyses/                  analysis scripts
 ├── manuscripts/               manuscript drafts
-├── scripts/                   backup_to_box.bat: uploads the session's data to Box over SFTP (desktop shortcut);
-│                              setup_box_login.bat: one-time, saves the Box login encrypted on each PC
+├── scripts/                   backup_to_box.bat: uploads the session's data to Box over SFTP (desktop shortcut;
+│                              asks for the user's own Box login each time, nothing is saved)
 └── resources/                 participant ECG slideshow, researcher checklist and training slides (open in a browser)
 ```
 
