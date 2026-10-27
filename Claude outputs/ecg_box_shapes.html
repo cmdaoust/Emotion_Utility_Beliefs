@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ECG Box Shapes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{--ink:#1d2b2f;--muted:#4f6569;--navy:#0f4c5c;--soft:#eaf4f3;--key:#e1f0ee;--line:#cfe2df;--good:#2e8b57}
+body{margin:0;background:#e6ecec;color:var(--ink);font-family:"Source Sans 3","Segoe UI",Arial,sans-serif;padding:24px 16px}
+.wrap{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:40px}
+h1{margin:0;font-size:28px}
+.opt h2{margin:0 0 4px;font-size:22px}
+.opt p.note{margin:0 0 12px;color:var(--muted);font-size:15px;max-width:70ch}
+.slide{background:#fff;padding:28px 36px;display:flex;flex-direction:column;gap:18px;box-shadow:0 2px 8px rgba(0,0,0,.1);font-size:17px;line-height:1.35}
+.slide h3{margin:0;font-size:28px;color:var(--navy)}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:700px){.cards{grid-template-columns:1fr}}
+.card b{display:block;font-size:19px;color:var(--navy);margin-bottom:4px}
+.key{font-size:17px}
+
+/* A: current */
+.A .card{background:var(--soft);border-radius:10px;border-top:6px solid var(--navy);padding:14px 16px}
+.A .card.g{border-top-color:var(--good)}
+.A .key{background:var(--key);border-left:8px solid var(--navy);border-radius:8px;padding:12px 18px}
+
+/* B: square */
+.B .card{background:var(--soft);border-radius:0;border-top:6px solid var(--navy);padding:14px 16px}
+.B .card.g{border-top-color:var(--good)}
+.B .key{background:var(--key);border-left:8px solid var(--navy);border-radius:0;padding:12px 18px}
+
+/* C: barely rounded */
+.C .card{background:var(--soft);border-radius:3px;border-top:4px solid var(--navy);padding:14px 16px}
+.C .card.g{border-top-color:var(--good)}
+.C .key{background:var(--key);border-left:5px solid var(--navy);border-radius:3px;padding:12px 18px}
+
+/* D: outlined, square */
+.D .card{background:#fff;border:1.5px solid var(--line);border-top:5px solid var(--navy);padding:14px 16px}
+.D .card.g{border-top-color:var(--good)}
+.D .key{background:#fff;border:1.5px solid var(--navy);padding:12px 18px}
+
+/* E: header band */
+.E .card{background:var(--soft);padding:0;overflow:hidden}
+.E .card b{background:var(--navy);color:#fff;padding:8px 16px;margin:0}
+.E .card.g b{background:var(--good)}
+.E .card span{display:block;padding:12px 16px}
+.E .key{background:var(--navy);color:#fff;padding:12px 18px}
+
+/* F: rule only, no fill */
+.F .card{background:none;border-left:4px solid var(--navy);padding:4px 0 4px 16px}
+.F .card.g{border-left-color:var(--good)}
+.F .key{background:none;border-top:2px solid var(--navy);border-bottom:2px solid var(--navy);padding:10px 0}
+</style></head><body><div class="wrap">
+<h1>Box shape options</h1>
+<div id="list"></div>
+</div>
+<script>
+var O=[
+ ["A","A. Current","Rounded corners (10px), coloured top edge, tinted fill."],
+ ["B","B. Square corners","Same as now with the rounding removed. The smallest change, and it looks crisper and more clinical."],
+ ["C","C. Barely rounded","3px corners and thinner edges. Softens the hard corners slightly without looking bubbly."],
+ ["D","D. Outlined","White boxes with a thin outline and a coloured top edge. Lighter and more like a form or document."],
+ ["E","E. Header band","Each card's title sits in a solid teal strip. The strongest structure; the key message becomes a solid teal bar."],
+ ["F","F. Rules only","No boxes at all, just a coloured line beside each item. The most minimal; the text does the work."]
+];
+var h='';
+O.forEach(function(o){
+ h+='<div class="opt '+o[0]+'"><h2>'+o[1]+'</h2><p class="note">'+o[2]+'</p><div class="slide"><h3>What you have in front of you</h3><div class="cards">'+
+ '<div class="card"><b>3 electrodes</b><span>Small round stickers with a metal stud, ready to stick on.</span></div>'+
+ '<div class="card"><b>3 wires</b><span>White, black and red, joined together with a clip.</span></div>'+
+ '<div class="card g"><b>Switch on</b><span>Turn on the sensor unit so we can check the signal.</span></div></div>'+
+ '<div class="key">Please <strong>don\'t touch the gel</strong> on the electrodes.</div></div></div>';
+});
+document.getElementById('list').innerHTML='<div style="display:flex;flex-direction:column;gap:40px">'+h+'</div>';
+</script></body></html>

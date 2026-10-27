@@ -6,7 +6,6 @@ bw_image/
 
 # Participant data: never commit (ethics/GDPR); stays on the machine that collected it
 data/
-experiment/data/
 *.psydat
 *.acq
 

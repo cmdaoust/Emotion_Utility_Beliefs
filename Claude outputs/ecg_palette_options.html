@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ECG Slide Palettes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+body{margin:0;background:#eceef2;color:#222;font-family:"Source Sans 3","Segoe UI",Arial,sans-serif;padding:24px 16px}
+.wrap{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:36px}
+h1{margin:0;font-size:28px}
+#list{display:flex;flex-direction:column;gap:40px}
+.opt h2{margin:0 0 4px;font-size:22px}
+.opt p.note{margin:0 0 12px;color:#555;font-size:15px;max-width:70ch}
+.row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:760px){.row{grid-template-columns:1fr}}
+.s{aspect-ratio:16/9;border-radius:6px;overflow:hidden;position:relative;padding:5% 6%;box-sizing:border-box;display:flex;flex-direction:column;gap:6%;font-size:clamp(9px,1.25vw,14px);box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.s.c{justify-content:center;align-items:center;text-align:center}
+.s .t{font-weight:700;font-size:2.1em;line-height:1.05}
+.s .h{font-weight:700;font-size:1.6em}
+.s .e{letter-spacing:.14em;text-transform:uppercase;font-size:.8em;font-weight:600;opacity:.75}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:5%}
+.card{border-radius:4px;padding:6% 7%;border-top:3px solid;font-size:.85em}
+.card b{display:block}
+.key{margin-top:auto;border-left:4px solid;border-radius:4px;padding:3% 4%;font-size:.85em}
+.bar{position:absolute;left:0;bottom:0;height:3px;width:45%}
+.dots span{display:inline-block;width:.9em;height:.9em;border-radius:50%;margin-right:.3em;vertical-align:-.1em;border:1px solid #333}
+.sw{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.sw div{font-size:12px;font-family:Consolas,monospace;display:flex;align-items:center;gap:6px}
+.sw i{width:22px;height:22px;border-radius:4px;border:1px solid rgba(0,0,0,.15);display:inline-block}
+</style></head><body><div class="wrap">
+<h1>Colour palette options for the ECG slideshow</h1>
+<div id="list"></div>
+</div>
+<script>
+var P=[
+ {n:"A. Midnight navy (current)",note:"Matches your workshop template. Formal and high contrast. The yellow progress bar is the only bright colour.",
+  title:"#000000",div:"#191970",accent:"#191970",soft:"#f3f4fa",key:"#eef0ff",bar:"#ffe76a",ink:"#222233",paper:"#ffffff"},
+ {n:"B. Clinical teal",note:"Calm and medical without looking like a hospital form. Teal stands well apart from the red, white and black leads.",
+  title:"#0b3640",div:"#0f4c5c",accent:"#0f4c5c",soft:"#eaf4f3",key:"#e1f0ee",bar:"#2a9d8f",ink:"#1d2b2f",paper:"#ffffff"},
+ {n:"C. Soft slate and sky",note:"The gentlest option. Low-key blues suit nervous participants, but section slides have less punch.",
+  title:"#2b3a4a",div:"#3d5a73",accent:"#3d5a73",soft:"#eef3f8",key:"#e4edf6",bar:"#7fb3d5",ink:"#1f2a35",paper:"#fbfcfe"},
+ {n:"D. Forest and sage",note:"Warm and reassuring. Avoid if you want green to mean 'correct' on a right/wrong clip photo, since it will clash.",
+  title:"#16302a",div:"#1f4d3a",accent:"#1f4d3a",soft:"#eef4ef",key:"#e3eee5",bar:"#8fbf7a",ink:"#1e2a24",paper:"#ffffff"},
+ {n:"E. Plum and lavender",note:"Friendly and less corporate. The purple is far enough from the red lead not to confuse them.",
+  title:"#2a1e3a",div:"#4b3069",accent:"#4b3069",soft:"#f4f0f8",key:"#ece5f4",bar:"#c3a6e0",ink:"#261f30",paper:"#ffffff"},
+ {n:"F. Charcoal and blue (maximum contrast)",note:"The most readable from a distance or on a dim lab monitor. Plain, but hard to misread.",
+  title:"#111418",div:"#1e2430",accent:"#1f5fae",soft:"#f1f4f8",key:"#e6eef8",bar:"#1f5fae",ink:"#111418",paper:"#ffffff"}
+];
+var L=document.getElementById('list'),h='';
+P.forEach(function(p){
+ h+='<div class="opt"><h2>'+p.n+'</h2><p class="note">'+p.note+'</p><div class="row">'+
+ '<div class="s c" style="background:'+p.title+';color:#fff"><div class="t">Setting up your heart sensors</div><div style="opacity:.8">How to put on the ECG electrodes yourself</div></div>'+
+ '<div class="s c" style="background:'+p.div+';color:#fff"><div class="e">Step 1</div><div class="t">Stick on the electrodes</div></div>'+
+ '<div class="s" style="background:'+p.paper+';color:'+p.ink+'"><div class="h" style="color:'+p.accent+'">What you have in front of you</div>'+
+ '<div class="cards"><div class="card" style="background:'+p.soft+';border-color:'+p.accent+'"><b style="color:'+p.accent+'">3 electrodes</b>Ready to stick</div>'+
+ '<div class="card" style="background:'+p.soft+';border-color:'+p.accent+'"><b style="color:'+p.accent+'">3 wires</b><span class="dots"><span style="background:#fff"></span><span style="background:#222"></span><span style="background:#e0123f;border-color:#e0123f"></span></span></div>'+
+ '<div class="card" style="background:'+p.soft+';border-color:#2e8b57"><b style="color:'+p.accent+'">Check</b>Signal together</div></div>'+
+ '<div class="key" style="background:'+p.key+';border-color:'+p.accent+'">Please don\'t touch the gel on the electrodes.</div>'+
+ '<div class="bar" style="background:'+p.bar+'"></div></div></div>'+
+ '<div class="sw">'+[['title',p.title],['section',p.div],['accent',p.accent],['card',p.soft],['key box',p.key],['progress',p.bar]].map(function(x){return '<div><i style="background:'+x[1]+'"></i>'+x[0]+' '+x[1]+'</div>'}).join('')+'</div></div>';
+});
+L.innerHTML=h;
+</script></body></html>
