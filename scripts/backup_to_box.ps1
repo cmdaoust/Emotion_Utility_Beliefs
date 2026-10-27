@@ -6,36 +6,45 @@
 #    Stimulus PC: uploads the PsychoPy data folder  -> raw_psychopy
 #    Biopac PC:   uploads the Biopac recordings     -> raw_physiology
 #
-#  It only UPLOADS new files. It never deletes or changes anything on
-#  this PC or in Box.
+#  Whoever runs it logs in with THEIR OWN Box account each time:
+#  their Box email and their Box-specific password (not the university
+#  password). Nothing is saved on this PC.
 #
-#  One-time setup on each PC: run setup_box_login.bat first.
+#  It only UPLOADS new files. It never deletes or changes anything on
+#  this PC or in Box, and it never creates folders in Box.
+#
 #  Needs WinSCP installed (https://winscp.net).
 # ====================================================================
-
-param([switch]$TestConnection)
 
 $ErrorActionPreference = 'Stop'
 
 # ---------- SETTINGS -------------------------------------------------
-$BoxHost    = 'sftp.services.box.com'
+$BoxHost = 'sftp.services.box.com'
 # Box's published SFTP host key (see "Using Box with SFTP" on support.box.com).
-$HostKey    = 'ecdsa-sha2-nistp256 256 An60IqVqISRa3o2GRscno7QLnsTrIy0BGIchIAvJ9ZM'
-$RemoteRoot = '/Carmen MD PhD/Emotion_Utility_Beliefs'
+$HostKey = 'ecdsa-sha2-nistp256 256 An60IqVqISRa3o2GRscno7QLnsTrIy0BGIchIAvJ9ZM'
+
+# Where the Box folders can appear, depending on who logs in:
+#  - students: the folders are shared with them, so they sit at the top
+#    level of their Box ("/raw_psychopy")
+#  - Carmen: they sit inside her own folder structure
+# The first location that exists for the logged-in account is used.
+$RemoteBases = @(
+    '',
+    '/Carmen MD PhD/Emotion_Utility_Beliefs'
+)
 # ---------------------------------------------------------------------
 
-$Docs     = [Environment]::GetFolderPath('MyDocuments')
+$Docs = [Environment]::GetFolderPath('MyDocuments')
 if (-not $Docs) { $Docs = Join-Path $env:USERPROFILE 'Documents' }
-$CredFile = Join-Path $env:LOCALAPPDATA 'EmotionUtilityBeliefs\box_sftp_credential.xml'
-$LogDir   = Join-Path $Docs 'box_backup_logs'
+$LogDir = Join-Path $Docs 'box_backup_logs'
 
 $Jobs = @(
     @{ Label  = 'PsychoPy data'
        Local  = Join-Path $Docs 'Github\Emotion_Utility_Beliefs\experiment\task\data'
-       Remote = "$RemoteRoot/raw_psychopy" },
+       Folder = 'raw_psychopy' },
     @{ Label  = 'Biopac recordings'
        Local  = Join-Path $Docs 'Carmen MD Emotion_Utility_Beliefs\data'
-       Remote = "$RemoteRoot/raw_physiology" }
+       Folder = 'raw_physiology' }
 )
 
 function Show-Result {
@@ -45,7 +54,7 @@ function Show-Result {
     Write-Host ('  ' + ('=' * 62)) -ForegroundColor White -BackgroundColor $bg
     Write-Host ('   ' + $Title.PadRight(60)) -ForegroundColor White -BackgroundColor $bg
     foreach ($l in $Lines) {
-        Write-Host ('   ' + $l.PadRight(60)) -ForegroundColor White -BackgroundColor $bg
+        Write-Host ('   ' + ([string]$l).PadRight(60)) -ForegroundColor White -BackgroundColor $bg
     }
     if (-not $Ok) {
         Write-Host ('   ' + 'Nothing has been deleted. All the data is still on this PC.'.PadRight(60)) -ForegroundColor White -BackgroundColor $bg
@@ -65,14 +74,9 @@ function Find-WinScpDll {
 
 $exitCode = 1
 $session  = $null
+$log      = ''
 try {
-    # ---- Checks before connecting ------------------------------------
-    if (-not (Test-Path $CredFile)) {
-        Show-Result $false 'BACKUP NOT DONE: no Box login saved on this PC' @(
-            'Tell Carmen: setup_box_login.bat needs to be run',
-            'on this PC, logged in to this Windows account.')
-        return
-    }
+    # ---- Checks before asking for a login ----------------------------
     $dll = Find-WinScpDll
     if (-not $dll) {
         Show-Result $false 'BACKUP NOT DONE: WinSCP is not installed' @(
@@ -80,18 +84,30 @@ try {
         return
     }
     $active = @($Jobs | Where-Object { Test-Path $_.Local })
-    if (-not $TestConnection -and $active.Count -eq 0) {
+    if ($active.Count -eq 0) {
         Show-Result $false 'BACKUP NOT DONE: no data folder found on this PC' @(
-            'Looked for:',
-            $Jobs[0].Local,
-            $Jobs[1].Local,
-            'Tell Carmen.')
+            'Looked for:', $Jobs[0].Local, $Jobs[1].Local, 'Tell Carmen.')
+        return
+    }
+
+    # ---- Ask for the Box login (used once, never saved) --------------
+    Write-Host ''
+    Write-Host '  Log in with YOUR Box account:'
+    Write-Host '    User name: your university email address'
+    Write-Host '    Password:  your Box-specific password'
+    Write-Host '               (NOT your university password)'
+    Write-Host ''
+    $cred = $null
+    try {
+        $cred = Get-Credential -Message 'Box login: your email and your Box-specific password (not your university password)'
+    } catch { $cred = $null }
+    if (-not $cred -or -not $cred.UserName) {
+        Show-Result $false 'BACKUP NOT DONE: login cancelled' @(
+            'Run the backup again and enter your Box login.')
         return
     }
 
     Add-Type -Path $dll
-    $cred = Import-Clixml -Path $CredFile
-
     New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
     $stamp = Get-Date -Format 'yyyy-MM-dd_HHmmss'
     $log   = Join-Path $LogDir ("backup_{0}_{1}.log" -f $env:COMPUTERNAME, $stamp)
@@ -104,27 +120,14 @@ try {
         SecurePassword        = $cred.Password
         SshHostKeyFingerprint = $HostKey
     }
+    $cred = $null
 
     $session = New-Object WinSCP.Session
-    $session.SessionLogPath = $log
+    $session.SessionLogPath = $log   # WinSCP never writes passwords to its log
 
-    Write-Host ''
     Write-Host '  Connecting to Box...'
     $session.Open($opts)
-
-    if (-not $session.FileExists($RemoteRoot)) {
-        Show-Result $false 'BACKUP NOT DONE: study folder not found in Box' @(
-            "Expected: $RemoteRoot",
-            'Tell Carmen: the folder or the login needs checking.')
-        return
-    }
-
-    if ($TestConnection) {
-        Show-Result $true 'CONNECTION OK' @(
-            'Logged in to Box and found the study folder.')
-        $exitCode = 0
-        return
-    }
+    $opts = $null
 
     # ---- Upload ------------------------------------------------------
     $transfer = New-Object WinSCP.TransferOptions
@@ -133,27 +136,38 @@ try {
     # Box doesn't keep file times, so compare by size, not date.
     $transfer.PreserveTimestamp = $false
 
-    $failed = @()
+    $failed  = @()
     $summary = @()
     foreach ($job in $active) {
         Write-Host ''
-        Write-Host ("  Uploading {0}..." -f $job.Label)
+        Write-Host ("  {0}" -f $job.Label)
+
+        # Find the Box folder for the logged-in account. Never create it:
+        # a missing folder means it hasn't been shared with this account.
+        $remote = $null
+        foreach ($base in $RemoteBases) {
+            $candidate = "$base/$($job.Folder)"
+            if ($session.FileExists($candidate)) { $remote = $candidate; break }
+        }
+        if (-not $remote) {
+            $failed  += $job.Label
+            $summary += ("{0}: Box folder '{1}' not found" -f $job.Label, $job.Folder)
+            Write-Host ("    PROBLEM: the Box folder '{0}' isn't shared with this account." -f $job.Folder) -ForegroundColor Red
+            continue
+        }
+
         Write-Host ("    From: {0}" -f $job.Local)
-        Write-Host ("    To:   Box{0}" -f $job.Remote)
+        Write-Host ("    To:   Box{0}" -f $remote)
         try {
-            if (-not $session.FileExists($job.Remote)) {
-                $session.CreateDirectory($job.Remote)
-            }
             # Remote mode, removeFiles = $false, mirror = $false:
             # upload new or changed files only, never delete anything.
             $result = $session.SynchronizeDirectories(
                 [WinSCP.SynchronizationMode]::Remote,
-                $job.Local, $job.Remote, $false, $false,
+                $job.Local, $remote, $false, $false,
                 [WinSCP.SynchronizationCriteria]::Size, $transfer)
             $result.Check()
-            $n = $result.Uploads.Count
             foreach ($u in $result.Uploads) { Write-Host ("    uploaded {0}" -f (Split-Path $u.FileName -Leaf)) }
-            $summary += ("{0}: {1} file(s) uploaded" -f $job.Label, $n)
+            $summary += ("{0}: {1} file(s) uploaded" -f $job.Label, $result.Uploads.Count)
         }
         catch {
             $failed  += $job.Label
@@ -168,28 +182,33 @@ try {
     }
     else {
         Show-Result $false 'BACKUP NOT COMPLETE: some files were not uploaded' ($summary + @(
-            'Close PsychoPy and the Biopac software, check the',
-            'internet connection, then run this again.',
+            'If a Box folder was not found: ask Carmen to share it',
+            'with your Box account.',
+            'Otherwise close PsychoPy and the Biopac software, check',
+            'the internet connection, and run this again.',
             'If it fails again, tell Carmen and send her the log:',
             $log))
     }
 }
 catch {
-    $msg = $_.Exception.Message
-    $hint = 'Check the internet connection and try again.'
-    if ($msg -match 'Authentication|password|Access denied') {
-        $hint = 'The Box login was refused. Tell Carmen.'
+    $msg  = $_.Exception.Message
+    $hint = @('Check the internet connection and try again.')
+    if ($msg -match 'Authentication|password|Access denied|denied') {
+        $hint = @('Box refused the login. Check you used your Box',
+                  'email and your Box-specific password, NOT your',
+                  'university password, then run this again.')
     }
     elseif ($msg -match 'service_blocked|403') {
-        $hint = 'Box SFTP is switched off for this account. Tell Carmen.'
+        $hint = @('Box SFTP is not switched on for your account.',
+                  'Tell Carmen.')
     }
     elseif ($msg -match 'host key|fingerprint') {
-        $hint = 'Box server identity did not match. Do not retry; tell Carmen.'
+        $hint = @('Box server identity did not match.',
+                  'Do not retry; tell Carmen.')
     }
-    Show-Result $false 'BACKUP NOT DONE: could not connect to Box' @(
-        $hint,
+    Show-Result $false 'BACKUP NOT DONE: could not log in to Box' ($hint + @(
         'If it keeps failing, tell Carmen and send her the log:',
-        "$log")
+        $log))
     Write-Host ("  Details: {0}" -f $msg) -ForegroundColor DarkGray
 }
 finally {
