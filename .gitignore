@@ -1,0 +1,28 @@
+# Stimulus folders: linked or copied in on each machine, never committed
+video_stimuli
+video_stimuli/
+bw_image
+bw_image/
+
+# Participant data: never commit (ethics/GDPR); stays on the machine that collected it
+data/
+experiment/data/
+*.psydat
+*.acq
+
+# PsychoPy-generated files (rebuilt from the .psyexp on each run)
+*_lastrun.py
+*.pyc
+__pycache__/
+
+# Backups (git history replaces these)
+*_backup_before_*
+backup_before_*/
+
+# Office lock files
+~$*
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
