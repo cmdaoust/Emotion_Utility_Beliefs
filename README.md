@@ -21,7 +21,8 @@ Emotion_Utility_Beliefs/
 │   ├── volume_test/           volume check media
 │   └── click_to_continue.png
 ├── analyses/                  analysis scripts
-└── manuscripts/               manuscript drafts
+├── manuscripts/               manuscript drafts
+└── resources/                 participant ECG slideshow, researcher checklist and training slides (open in a browser)
 ```
 
 The experiments use `../` paths from `experiment/task/`, so the stimuli must sit directly in `experiment/` with exactly these names.
