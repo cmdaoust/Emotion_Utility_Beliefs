@@ -70,7 +70,7 @@
     <Param val="1000" valType="num" updates="None" name="plPupilRemoteTimeoutMs"/>
     <Param val="False" valType="bool" updates="None" name="plPupillometryOnly"/>
     <Param val="psychopy_iohub_surface" valType="str" updates="None" name="plSurfaceName"/>
-    <Param val="1" valType="code" updates="None" name="runMode"/>
+    <Param val="0" valType="code" updates="None" name="runMode"/>
     <Param val="False" valType="bool" updates="None" name="rush"/>
     <Param val="time" valType="str" updates="None" name="sortColumns"/>
     <Param val="" valType="str" updates="None" name="tbLicenseFile"/>
@@ -2732,7 +2732,7 @@
         <Param val="" valType="extendedCode" updates="constant" name="End Experiment"/>
         <Param val="" valType="extendedCode" updates="constant" name="End JS Experiment"/>
         <Param val="" valType="extendedCode" updates="constant" name="End JS Routine"/>
-        <Param val="" valType="extendedCode" updates="constant" name="End Routine"/>
+        <Param val="# Comprehension check: the &quot;I was told...&quot; answer must match what the&amp;#10;# instructions said (toldCorrect comes from the instructions conditions file).&amp;#10;# The surrounding comprehension loop repeats the instructions until it is correct.&amp;#10;told_correct = instruct_told_slider.getRating() == toldCorrect&amp;#10;if PILOTING and instruct_told_slider.getRating() is None:&amp;#10;    told_correct = True  # skipped with Tab while piloting&amp;#10;thisExp.addData('told_correct', told_correct)&amp;#10;if told_correct:&amp;#10;    currentLoop.finished = True&amp;#10;" valType="extendedCode" updates="constant" name="End Routine"/>
         <Param val="False" valType="bool" updates="None" name="disabled"/>
         <Param val="instruct_question_code" valType="code" updates="None" name="name"/>
       </CodeComponent>
@@ -2840,7 +2840,7 @@
         <Param val="False" valType="bool" updates="constant" name="forceEndRoutine"/>
         <Param val="1" valType="num" updates="constant" name="granularity"/>
         <Param val="" valType="code" updates="None" name="initVal"/>
-        <Param val="[&quot;Hinder&quot;, &quot;Have no effect on&quot;, &quot;Improve&quot;]" valType="list" updates="constant" name="labels"/>
+        <Param val="[&quot;Impair&quot;, &quot;Have no effect on&quot;, &quot;Improve&quot;]" valType="list" updates="constant" name="labels"/>
         <Param val="0.03" valType="num" updates="constant" name="letterHeight"/>
         <Param val="instruct_told_slider" valType="code" updates="None" name="name"/>
         <Param val="1" valType="num" updates="constant" name="opacity"/>
@@ -2904,7 +2904,7 @@
         <Param val="False" valType="bool" updates="constant" name="forceEndRoutine"/>
         <Param val="1" valType="num" updates="constant" name="granularity"/>
         <Param val="" valType="code" updates="None" name="initVal"/>
-        <Param val="[&quot;Greatly\nhinders&quot;, &quot;&quot;, &quot;&quot;, &quot;No effect&quot;, &quot;&quot;, &quot;&quot;, &quot;Greatly\nimproves&quot;]" valType="list" updates="constant" name="labels"/>
+        <Param val="[&quot;Greatly\nimpairs&quot;,&quot;&quot;, &quot;&quot;, &quot;No effect&quot;, &quot;&quot;, &quot;&quot;, &quot;Greatly\nimproves&quot;]" valType="list" updates="constant" name="labels"/>
         <Param val="0.03" valType="num" updates="constant" name="letterHeight"/>
         <Param val="instruct_believe_slider" valType="code" updates="None" name="name"/>
         <Param val="1" valType="num" updates="constant" name="opacity"/>
@@ -3143,6 +3143,23 @@
         <Param val="" valType="extendedCode" updates="constant" name="End Routine"/>
         <Param val="False" valType="bool" updates="None" name="disabled"/>
         <Param val="volume_adjust_code" valType="code" updates="None" name="name"/>
+      </CodeComponent>
+      <CodeComponent name="tab_skip_code" plugin="None">
+        <Param val="" valType="extendedCode" updates="constant" name="Before Experiment"/>
+        <Param val="" valType="extendedCode" updates="constant" name="Before JS Experiment"/>
+        <Param val="# Press Tab to skip the current routine (pilot mode only).&amp;#10;# Every routine checks for Escape once per frame; this wraps that check so a&amp;#10;# Tab press marks all of the current routine's components as finished, which&amp;#10;# ends the routine normally (end-routine code and data saving still run).&amp;#10;TAB_SKIP_ENABLED = PILOTING&amp;#10;if TAB_SKIP_ENABLED:&amp;#10;    _currentRoutine = [None]&amp;#10;    _routineInit = data.Routine.__init__&amp;#10;    def _trackRoutine(self, *args, **kwargs):&amp;#10;        _routineInit(self, *args, **kwargs)&amp;#10;        _currentRoutine[0] = self&amp;#10;    data.Routine.__init__ = _trackRoutine&amp;#10;&amp;#10;    _escapeGetKeys = defaultKeyboard.getKeys&amp;#10;    def _getKeysWithTabSkip(keyList=None, **kwargs):&amp;#10;        if keyList != [&quot;escape&quot;]:&amp;#10;            return _escapeGetKeys(keyList=keyList, **kwargs)&amp;#10;        keys = _escapeGetKeys(keyList=[&quot;escape&quot;, &quot;tab&quot;], **kwargs)&amp;#10;        routine = _currentRoutine[0]&amp;#10;        if routine is not None and any(k.name == &quot;tab&quot; for k in keys):&amp;#10;            for comp in routine.components:&amp;#10;                if hasattr(comp, &quot;status&quot;):&amp;#10;                    comp.status = FINISHED&amp;#10;            routine.forceEnded = True  # so non-slip routines reset their timer&amp;#10;        return [k for k in keys if k.name != &quot;tab&quot;]&amp;#10;    defaultKeyboard.getKeys = _getKeysWithTabSkip&amp;#10;" valType="extendedCode" updates="constant" name="Begin Experiment"/>
+        <Param val="" valType="extendedCode" updates="constant" name="Begin JS Experiment"/>
+        <Param val="" valType="extendedCode" updates="constant" name="Begin JS Routine"/>
+        <Param val="" valType="extendedCode" updates="constant" name="Begin Routine"/>
+        <Param val="Py" valType="str" updates="None" name="Code Type"/>
+        <Param val="" valType="extendedCode" updates="constant" name="Each Frame"/>
+        <Param val="" valType="extendedCode" updates="constant" name="Each JS Frame"/>
+        <Param val="" valType="extendedCode" updates="constant" name="End Experiment"/>
+        <Param val="" valType="extendedCode" updates="constant" name="End JS Experiment"/>
+        <Param val="" valType="extendedCode" updates="constant" name="End JS Routine"/>
+        <Param val="" valType="extendedCode" updates="constant" name="End Routine"/>
+        <Param val="False" valType="bool" updates="None" name="disabled"/>
+        <Param val="tab_skip_code" valType="code" updates="None" name="name"/>
       </CodeComponent>
       <MouseComponent name="play_mouse" plugin="None">
         <Param val="play_image_object" valType="list" updates="constant" name="clickable"/>
@@ -4070,7 +4087,7 @@
         <Param val="False" valType="bool" updates="constant" name="forceEndRoutine"/>
         <Param val="1" valType="num" updates="constant" name="granularity"/>
         <Param val="" valType="code" updates="None" name="initVal"/>
-        <Param val="[&quot;Greatly\nhinders&quot;, &quot;&quot;, &quot;&quot;, &quot;No effect&quot;, &quot;&quot;, &quot;&quot;, &quot;Greatly\nimproves&quot;]" valType="list" updates="constant" name="labels"/>
+        <Param val="[&quot;Greatly\nimpairs&quot;,&quot;&quot;, &quot;&quot;, &quot;No effect&quot;, &quot;&quot;, &quot;&quot;, &quot;Greatly\nimproves&quot;]" valType="list" updates="constant" name="labels"/>
         <Param val="0.03" valType="num" updates="constant" name="letterHeight"/>
         <Param val="baseline_belief_slider" valType="code" updates="None" name="name"/>
         <Param val="1" valType="num" updates="constant" name="opacity"/>
@@ -4990,6 +5007,117 @@
         <Param val="mouse onset" valType="str" updates="constant" name="timeRelativeTo"/>
       </MouseComponent>
     </Routine>
+    <Routine name="instruct_incorrect">
+      <RoutineSettingsComponent name="instruct_incorrect" plugin="None">
+        <Param val="none" valType="str" updates="None" name="backgroundFit"/>
+        <Param val="" valType="str" updates="None" name="backgroundImg"/>
+        <Param val="$[0,0,0]" valType="color" updates="None" name="color"/>
+        <Param val="rgb" valType="str" updates="None" name="colorSpace"/>
+        <Param val="" valType="str" updates="constant" name="desc"/>
+        <Param val="False" valType="bool" updates="None" name="disabled"/>
+        <Param val="" valType="code" updates="None" name="durationEstim"/>
+        <Param val="False" valType="code" updates="None" name="forceNonSlip"/>
+        <Param val="instruct_incorrect" valType="code" updates="None" name="name"/>
+        <Param val="True" valType="bool" updates="None" name="saveStartStop"/>
+        <Param val="told_correct" valType="code" updates="constant" name="skipIf"/>
+        <Param val="duration (s)" valType="str" updates="None" name="stopType"/>
+        <Param val="" valType="code" updates="constant" name="stopVal"/>
+        <Param val="False" valType="bool" updates="None" name="useWindowParams"/>
+      </RoutineSettingsComponent>
+      <TextComponent name="instruct_incorrect_text" plugin="None">
+        <Param val="white" valType="color" updates="constant" name="color"/>
+        <Param val="rgb" valType="str" updates="constant" name="colorSpace"/>
+        <Param val="1" valType="num" updates="constant" name="contrast"/>
+        <Param val="False" valType="bool" updates="None" name="disabled"/>
+        <Param val="False" valType="code" updates="constant" name="draggable"/>
+        <Param val="" valType="code" updates="None" name="durationEstim"/>
+        <Param val="None" valType="str" updates="constant" name="flip"/>
+        <Param val="Arial" valType="str" updates="constant" name="font"/>
+        <Param val="LTR" valType="str" updates="None" name="languageStyle"/>
+        <Param val="0.035" valType="num" updates="constant" name="letterHeight"/>
+        <Param val="instruct_incorrect_text" valType="code" updates="None" name="name"/>
+        <Param val="" valType="num" updates="constant" name="opacity"/>
+        <Param val="0" valType="num" updates="constant" name="ori"/>
+        <Param val="(0, 0.05)" valType="list" updates="constant" name="pos"/>
+        <Param val="True" valType="bool" updates="None" name="saveStartStop"/>
+        <Param val="" valType="code" updates="None" name="startEstim"/>
+        <Param val="time (s)" valType="str" updates="None" name="startType"/>
+        <Param val="0.0" valType="code" updates="None" name="startVal"/>
+        <Param val="duration (s)" valType="str" updates="None" name="stopType"/>
+        <Param val="" valType="code" updates="constant" name="stopVal"/>
+        <Param val="True" valType="bool" updates="None" name="syncScreenRefresh"/>
+        <Param val="You answered the following question incorrectly:&amp;#10;&amp;#10;&quot;I was told that experiencing intense emotions while watching the upcoming set of videos would ___ my performance on the task.&quot;&amp;#10;&amp;#10;On the next page you will see the information again. Please read it carefully, then answer the questions again." valType="str" updates="constant" name="text"/>
+        <Param val="from exp settings" valType="str" updates="None" name="units"/>
+        <Param val="" valType="code" updates="None" name="validator"/>
+        <Param val="1.5" valType="num" updates="constant" name="wrapWidth"/>
+      </TextComponent>
+      <ImageComponent name="instruct_incorrect_continue_image" plugin="None">
+        <Param val="center" valType="str" updates="constant" name="anchor"/>
+        <Param val="$[1,1,1]" valType="color" updates="constant" name="color"/>
+        <Param val="rgb" valType="str" updates="constant" name="colorSpace"/>
+        <Param val="1" valType="num" updates="constant" name="contrast"/>
+        <Param val="False" valType="bool" updates="None" name="disabled"/>
+        <Param val="False" valType="code" updates="constant" name="draggable"/>
+        <Param val="" valType="code" updates="None" name="durationEstim"/>
+        <Param val="False" valType="bool" updates="constant" name="flipHoriz"/>
+        <Param val="False" valType="bool" updates="constant" name="flipVert"/>
+        <Param val="../click_to_continue.png" valType="file" updates="constant" name="image"/>
+        <Param val="linear" valType="str" updates="constant" name="interpolate"/>
+        <Param val="" valType="str" updates="constant" name="mask"/>
+        <Param val="instruct_incorrect_continue_image" valType="code" updates="None" name="name"/>
+        <Param val="" valType="num" updates="constant" name="opacity"/>
+        <Param val="0" valType="num" updates="constant" name="ori"/>
+        <Param val="(0, -0.4)" valType="list" updates="constant" name="pos"/>
+        <Param val="True" valType="bool" updates="None" name="saveStartStop"/>
+        <Param val="(0.4, 0.08)" valType="list" updates="constant" name="size"/>
+        <Param val="" valType="code" updates="None" name="startEstim"/>
+        <Param val="time (s)" valType="str" updates="None" name="startType"/>
+        <Param val="2" valType="code" updates="None" name="startVal"/>
+        <Param val="duration (s)" valType="str" updates="None" name="stopType"/>
+        <Param val="" valType="code" updates="constant" name="stopVal"/>
+        <Param val="True" valType="bool" updates="None" name="syncScreenRefresh"/>
+        <Param val="128" valType="num" updates="constant" name="texture resolution"/>
+        <Param val="from exp settings" valType="str" updates="None" name="units"/>
+        <Param val="" valType="code" updates="None" name="validator"/>
+      </ImageComponent>
+      <MouseComponent name="instruct_incorrect_mouse" plugin="None">
+        <Param val="instruct_incorrect_continue_image" valType="list" updates="constant" name="clickable"/>
+        <Param val="" valType="list" updates="constant" name="correctAns"/>
+        <Param val="False" valType="bool" updates="None" name="disabled"/>
+        <Param val="" valType="code" updates="None" name="durationEstim"/>
+        <Param val="valid click" valType="str" updates="constant" name="forceEndRoutineOnPress"/>
+        <Param val="instruct_incorrect_mouse" valType="code" updates="None" name="name"/>
+        <Param val="False" valType="bool" updates="constant" name="newClicksOnly"/>
+        <Param val="on click" valType="str" updates="None" name="saveMouseState"/>
+        <Param val="name," valType="list" updates="constant" name="saveParamsClickable"/>
+        <Param val="True" valType="bool" updates="None" name="saveStartStop"/>
+        <Param val="" valType="code" updates="None" name="startEstim"/>
+        <Param val="time (s)" valType="str" updates="None" name="startType"/>
+        <Param val="2" valType="code" updates="None" name="startVal"/>
+        <Param val="duration (s)" valType="str" updates="None" name="stopType"/>
+        <Param val="" valType="code" updates="constant" name="stopVal"/>
+        <Param val="False" valType="bool" updates="constant" name="storeCorrect"/>
+        <Param val="False" valType="bool" updates="None" name="syncScreenRefresh"/>
+        <Param val="mouse onset" valType="str" updates="constant" name="timeRelativeTo"/>
+      </MouseComponent>
+      <CodeComponent name="instruct_incorrect_code" plugin="None">
+        <Param val="" valType="extendedCode" updates="constant" name="Before Experiment"/>
+        <Param val="" valType="extendedCode" updates="constant" name="Before JS Experiment"/>
+        <Param val="" valType="extendedCode" updates="constant" name="Begin Experiment"/>
+        <Param val="" valType="extendedCode" updates="constant" name="Begin JS Experiment"/>
+        <Param val="psychoJS.window.mouseVisible = true;&amp;#10;instruct_text.alignText = &quot;left&quot;;&amp;#10;" valType="extendedCode" updates="constant" name="Begin JS Routine"/>
+        <Param val="win.mouseVisible = True&amp;#10;instruct_text.alignText = 'left'" valType="extendedCode" updates="constant" name="Begin Routine"/>
+        <Param val="Py" valType="str" updates="None" name="Code Type"/>
+        <Param val="" valType="extendedCode" updates="constant" name="Each Frame"/>
+        <Param val="" valType="extendedCode" updates="constant" name="Each JS Frame"/>
+        <Param val="" valType="extendedCode" updates="constant" name="End Experiment"/>
+        <Param val="" valType="extendedCode" updates="constant" name="End JS Experiment"/>
+        <Param val="" valType="extendedCode" updates="constant" name="End JS Routine"/>
+        <Param val="" valType="extendedCode" updates="constant" name="End Routine"/>
+        <Param val="False" valType="bool" updates="None" name="disabled"/>
+        <Param val="instruct_incorrect_code" valType="code" updates="None" name="name"/>
+      </CodeComponent>
+    </Routine>
   </Routines>
   <Flow>
     <Routine name="volume_test"/>
@@ -5029,8 +5157,21 @@
       <Param name="name" updates="None" val="control_instructions" valType="code"/>
       <Param name="random seed" updates="None" val="" valType="code"/>
     </LoopInitiator>
+    <LoopInitiator loopType="TrialHandler" name="control_comprehension">
+      <Param name="Selected rows" updates="None" val="" valType="str"/>
+      <Param name="conditions" updates="None" val="[]" valType="str"/>
+      <Param name="conditionsFile" updates="None" val="" valType="file"/>
+      <Param name="endPoints" updates="None" val="[0, 1]" valType="num"/>
+      <Param name="isTrials" updates="None" val="True" valType="bool"/>
+      <Param name="loopType" updates="None" val="sequential" valType="str"/>
+      <Param name="nReps" updates="None" val="999" valType="num"/>
+      <Param name="name" updates="None" val="control_comprehension" valType="code"/>
+      <Param name="random seed" updates="None" val="" valType="code"/>
+    </LoopInitiator>
     <Routine name="instruct_introduction"/>
     <Routine name="instruct_questions"/>
+    <Routine name="instruct_incorrect"/>
+    <LoopTerminator name="control_comprehension"/>
     <Routine name="instruct_affect_rating"/>
     <Routine name="ready_routine"/>
     <LoopTerminator name="control_instructions"/>
@@ -5104,8 +5245,21 @@
       <Param name="name" updates="None" val="up_instructions" valType="code"/>
       <Param name="random seed" updates="None" val="" valType="code"/>
     </LoopInitiator>
+    <LoopInitiator loopType="TrialHandler" name="up_comprehension">
+      <Param name="Selected rows" updates="None" val="" valType="str"/>
+      <Param name="conditions" updates="None" val="[]" valType="str"/>
+      <Param name="conditionsFile" updates="None" val="" valType="file"/>
+      <Param name="endPoints" updates="None" val="[0, 1]" valType="num"/>
+      <Param name="isTrials" updates="None" val="True" valType="bool"/>
+      <Param name="loopType" updates="None" val="sequential" valType="str"/>
+      <Param name="nReps" updates="None" val="999" valType="num"/>
+      <Param name="name" updates="None" val="up_comprehension" valType="code"/>
+      <Param name="random seed" updates="None" val="" valType="code"/>
+    </LoopInitiator>
     <Routine name="instruct_introduction"/>
     <Routine name="instruct_questions"/>
+    <Routine name="instruct_incorrect"/>
+    <LoopTerminator name="up_comprehension"/>
     <Routine name="instruct_affect_rating"/>
     <Routine name="ready_routine"/>
     <LoopTerminator name="up_instructions"/>
@@ -5180,8 +5334,21 @@
       <Param name="name" updates="None" val="down_instructions" valType="code"/>
       <Param name="random seed" updates="None" val="" valType="code"/>
     </LoopInitiator>
+    <LoopInitiator loopType="TrialHandler" name="down_comprehension">
+      <Param name="Selected rows" updates="None" val="" valType="str"/>
+      <Param name="conditions" updates="None" val="[]" valType="str"/>
+      <Param name="conditionsFile" updates="None" val="" valType="file"/>
+      <Param name="endPoints" updates="None" val="[0, 1]" valType="num"/>
+      <Param name="isTrials" updates="None" val="True" valType="bool"/>
+      <Param name="loopType" updates="None" val="sequential" valType="str"/>
+      <Param name="nReps" updates="None" val="999" valType="num"/>
+      <Param name="name" updates="None" val="down_comprehension" valType="code"/>
+      <Param name="random seed" updates="None" val="" valType="code"/>
+    </LoopInitiator>
     <Routine name="instruct_introduction"/>
     <Routine name="instruct_questions"/>
+    <Routine name="instruct_incorrect"/>
+    <LoopTerminator name="down_comprehension"/>
     <Routine name="instruct_affect_rating"/>
     <Routine name="ready_routine"/>
     <LoopTerminator name="down_instructions"/>
