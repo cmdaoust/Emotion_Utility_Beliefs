@@ -1,0 +1,578 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Emotion Utility Beliefs Walkthrough</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Open+Sans:wght@400;600&display=swap">
+<style>
+/* Layout: a lab-console frame (header, section steps, note line) around a fixed grey
+   16:9 "participant screen" that copies the PsychoPy window. The screen keeps the
+   experiment's own look in both themes; only the frame follows the theme. */
+:root {
+  --bg: #edf0f2;
+  --panel: #ffffff;
+  --fg: #1c232a;
+  --muted: #5a6670;
+  --line: #d3d9de;
+  --accent: #2c6a87;
+  --accent-fg: #ffffff;
+  --screen: #808080;          /* PsychoPy rgb [0,0,0] */
+  --screen-fg: #ffffff;
+  --marker: #ff2a2a;          /* PsychoPy slider marker */
+  --font-ui: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --font-screen: "Open Sans", Arial, Helvetica, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14181c; --panel: #1d2227; --fg: #e4e8eb; --muted: #9aa6af;
+    --line: #313941; --accent: #7db6d1; --accent-fg: #0f1418; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14181c; --panel: #1d2227; --fg: #e4e8eb; --muted: #9aa6af;
+  --line: #313941; --accent: #7db6d1; --accent-fg: #0f1418; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font-ui); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 18px 28px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 14px; }
+
+/* header */
+.bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 18px; }
+.bar h1 { margin: 0; font-size: 1.15rem; font-weight: 600; text-wrap: balance; }
+.bar .sub { margin: 2px 0 0; color: var(--muted); font-size: 0.85rem; }
+.tools { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn {
+  font: 500 0.85rem/1 var(--font-ui); padding: 9px 13px; border-radius: 6px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--panel); color: var(--fg);
+}
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.btn:focus-visible, .stage :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+/* section steps: the order of the session */
+.steps { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; font-family: var(--font-mono); font-size: 0.75rem; }
+.steps li { padding: 4px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+.steps li.done { color: var(--fg); }
+.steps li.now { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+
+/* participant screen */
+.stage {
+  position: relative; width: min(100%, calc(76vh * 16 / 9)); aspect-ratio: 16 / 9; margin: 0 auto;
+  background: var(--screen); color: var(--screen-fg); border-radius: 4px; overflow: hidden;
+  container-type: size; box-shadow: 0 0 0 1px var(--line);
+}
+.screen {
+  --h: 1cqh;                        /* 1% of screen height = PsychoPy height unit / 100 */
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: calc(var(--h) * 3.2); padding: calc(var(--h) * 6) calc(var(--h) * 8);
+  font-family: var(--font-screen); font-size: calc(var(--h) * 3.6); line-height: 1.32; text-align: center;
+}
+.screen p { margin: 0; white-space: pre-line; max-width: calc(var(--h) * 150); }
+.screen .left { text-align: left; }
+.screen .lg { font-size: calc(var(--h) * 4.6); }
+.screen .sm { font-size: calc(var(--h) * 3); }
+.screen .group { display: flex; flex-direction: column; align-items: center; gap: calc(var(--h) * 1.6); }
+
+.cont {
+  font: 400 calc(var(--h) * 3.4) / 1 var(--font-screen); color: var(--screen-fg); background: transparent;
+  border: 2px solid var(--screen-fg); border-radius: calc(var(--h) * 1.4);
+  width: calc(var(--h) * 40); height: calc(var(--h) * 8); cursor: pointer; flex: none;
+}
+.cont[hidden] { display: block !important; visibility: hidden; }
+.cont:hover { background: rgba(255, 255, 255, 0.12); }
+
+/* 7-point rating and 3-option radio scales */
+.scale { width: calc(var(--h) * 125); max-width: 100%; }
+.scale .row { position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; height: calc(var(--h) * 5); }
+.scale .row::before { content: ""; position: absolute; left: calc(100% / var(--n) / 2); right: calc(100% / var(--n) / 2); top: 50%; border-top: 2px solid var(--screen-fg); }
+.scale.radio .row::before { display: none; }
+.scale .opt { position: relative; background: none; border: 0; padding: 0; cursor: pointer; color: inherit; }
+.scale .opt::before { content: ""; position: absolute; left: 50%; top: 50%; width: 2px; height: calc(var(--h) * 2.4); background: var(--screen-fg); transform: translate(-50%, -50%); }
+.scale.radio .opt::before { width: calc(var(--h) * 2.6); height: calc(var(--h) * 2.6); border-radius: 50%; background: transparent; border: 2px solid var(--screen-fg); }
+.scale .opt[aria-checked="true"]::after { content: ""; position: absolute; left: 50%; top: 50%; width: calc(var(--h) * 2.8); height: calc(var(--h) * 2.8); border-radius: 50%; background: var(--marker); transform: translate(-50%, -50%); }
+.scale .labels { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; font-size: calc(var(--h) * 2.8); line-height: 1.2; }
+.scale .labels span { white-space: pre-line; }
+
+/* affective slider: continuous track with an intensity cue and end icons */
+.aff { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: calc(var(--h) * 2.4); width: calc(var(--h) * 110); max-width: 100%; }
+.aff svg { width: calc(var(--h) * 7.5); height: calc(var(--h) * 7.5); }
+.aff .mid { display: grid; gap: calc(var(--h) * 1.2); }
+.cue { height: calc(var(--h) * 3); display: grid; grid-template-columns: 1fr 1fr; }
+.cue span { background: linear-gradient(90deg, rgba(255,255,255,0.85), rgba(30,30,30,0.95)); clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.cue span + span { transform: scaleX(-1); }
+.track { position: relative; height: calc(var(--h) * 5); cursor: pointer; touch-action: none; }
+.track::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; border-top: 3px solid var(--screen-fg); transform: translateY(-50%); }
+.thumb { position: absolute; top: 50%; width: calc(var(--h) * 3.2); height: calc(var(--h) * 3.2); border-radius: 50%; background: var(--screen-fg); border: 2px solid #3a3a3a; transform: translate(-50%, -50%); }
+.ends { display: flex; justify-content: space-between; font-size: calc(var(--h) * 2.8); }
+
+/* stroop */
+.word { font-size: calc(var(--h) * 15); font-family: Arial, Helvetica, sans-serif; line-height: 1; }
+.pin-top, .pin-bottom { position: absolute; left: 0; right: 0; font-size: calc(var(--h) * 3.5); white-space: pre; }
+.pin-top { top: calc(var(--h) * 4.5); }
+.pin-bottom { bottom: calc(var(--h) * 4.5); }
+.cross { font-size: calc(var(--h) * 10); line-height: 1; }
+
+/* placeholders */
+.ph {
+  width: calc(var(--h) * 120); max-width: 100%; aspect-ratio: 16 / 9; display: grid; place-items: center; align-content: center; gap: calc(var(--h) * 2);
+  background: #2c2c2c; color: #d9d9d9; border-radius: calc(var(--h) * 0.8); font-size: calc(var(--h) * 4);
+}
+.ph small { font-size: calc(var(--h) * 2.8); color: #a9a9a9; }
+.bar-fill { width: calc(var(--h) * 60); height: calc(var(--h) * 0.8); background: #555; border-radius: 99px; overflow: hidden; }
+.bar-fill i { display: block; height: 100%; width: 0; background: #d9d9d9; }
+.play { width: calc(var(--h) * 12); height: calc(var(--h) * 12); border-radius: 50%; border: 2px solid var(--screen-fg); background: transparent; cursor: pointer; display: grid; place-items: center; }
+.play::before { content: ""; border-left: calc(var(--h) * 4) solid var(--screen-fg); border-top: calc(var(--h) * 2.4) solid transparent; border-bottom: calc(var(--h) * 2.4) solid transparent; margin-left: calc(var(--h) * 1); }
+.boxes { display: flex; gap: calc(var(--h) * 12); }
+.boxes button { width: calc(var(--h) * 22); height: calc(var(--h) * 10); font: inherit; font-size: calc(var(--h) * 4); color: var(--screen-fg); background: transparent; border: 2px solid var(--screen-fg); cursor: pointer; }
+.boxes button:hover { background: rgba(255, 255, 255, 0.12); }
+textarea {
+  width: calc(var(--h) * 110); max-width: 100%; height: calc(var(--h) * 22); resize: none;
+  font: calc(var(--h) * 3.4) / 1.35 var(--font-screen); color: #111; background: #fff; border: 0; padding: calc(var(--h) * 1.6);
+}
+
+/* narrator cards (not part of the participant's screen) */
+.stage.narrate { background: var(--panel); color: var(--fg); }
+.narrate .screen { font-family: var(--font-ui); font-size: calc(var(--h) * 3.3); align-items: stretch; justify-content: center; text-align: left; }
+.narrate .screen > * { max-width: calc(var(--h) * 140); margin-inline: auto; width: 100%; }
+.narrate h2 { margin: 0; font-size: calc(var(--h) * 5.4); font-weight: 600; text-wrap: balance; }
+.narrate ul { margin: 0; padding-left: 1.2em; display: grid; gap: calc(var(--h) * 1.2); }
+.narrate .eyebrow { font-family: var(--font-mono); font-size: calc(var(--h) * 2.6); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.narrate .btn { font-size: calc(var(--h) * 3.2); padding: calc(var(--h) * 2) calc(var(--h) * 3.4); }
+.narrate .actions { display: flex; gap: calc(var(--h) * 2); }
+
+/* under the screen */
+.note { margin: 0; min-height: 1.5em; font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); text-align: center; }
+.keypad { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+.keypad .btn { min-width: 84px; font-family: var(--font-mono); }
+
+/* phones: let the screen grow with its content and use fixed text sizes */
+@media (max-width: 720px) {
+  .stage { aspect-ratio: auto; min-height: 72vh; width: 100%; container-type: inline-size; display: flex; }
+  .screen { --h: 4px; position: relative; flex: 1; padding: 52px 14px; }
+  .pin-top, .pin-bottom { white-space: normal; padding-inline: 10px; }
+  .boxes { gap: 24px; }
+}
+@media (prefers-reduced-motion: reduce) { .bar-fill i { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="bar">
+    <div>
+      <h1>Emotion Utility Beliefs Walkthrough</h1>
+      <p class="sub">Click through what a participant sees. Videos and faces are placeholders, and nothing you enter is saved.</p>
+    </div>
+    <div class="tools">
+      <button class="btn" id="skip" type="button" title="Jump to the next screen, like Tab in pilot mode">Skip screen</button>
+      <button class="btn" id="restart" type="button">Restart</button>
+    </div>
+  </header>
+  <ol class="steps" id="steps" aria-label="Sections"></ol>
+  <div class="stage" id="stage"><div class="screen" id="screen"></div></div>
+  <p class="note" id="note" aria-live="polite"></p>
+  <div class="keypad" id="keypad" hidden>
+    <button class="btn" type="button" data-key="left">&#8592; Left</button>
+    <button class="btn" type="button" data-key="down">&#8595; Down</button>
+    <button class="btn" type="button" data-key="right">&#8594; Right</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = (s, el = document) => el.querySelector(s);
+  const stage = $('#stage'), screenEl = $('#screen'), noteEl = $('#note'), keypad = $('#keypad');
+
+  const SECTIONS = ['Setup', 'Instructions', 'Videos', 'After the videos', 'Colour Stroop', 'Rest of the study', 'End'];
+  const stepsEl = $('#steps');
+  SECTIONS.forEach(s => { const li = document.createElement('li'); li.textContent = s; stepsEl.appendChild(li); });
+  function section(name) {
+    const i = SECTIONS.indexOf(name);
+    [...stepsEl.children].forEach((li, j) => { li.className = j < i ? 'done' : j === i ? 'now' : ''; });
+  }
+
+  // ---------- screen runner ----------
+  class Cancelled extends Error {}
+  let current = null;          // { finish, cancel, skipValue }
+  let keyHandler = null;
+
+  function show(build, { narrate = false, note = '', keys = false, skipValue } = {}) {
+    if (current) current.cleanup();
+    return new Promise((resolve, reject) => {
+      const timers = [];
+      screenEl.replaceChildren();
+      stage.classList.toggle('narrate', narrate);
+      noteEl.textContent = note;
+      keypad.hidden = !keys;
+      keyHandler = null;
+      const api = {
+        el: screenEl,
+        after(ms, fn) { timers.push(setTimeout(fn, ms)); },
+        every(ms, fn) { timers.push(setInterval(fn, ms)); },
+        onKey(fn) { keyHandler = fn; },
+        note(t) { noteEl.textContent = t; },
+        finish(v) { me.cleanup(); current = null; resolve(v); },
+      };
+      const me = {
+        skipValue,
+        finish: api.finish,
+        cancel() { me.cleanup(); current = null; reject(new Cancelled()); },
+        cleanup() { timers.forEach(t => { clearTimeout(t); clearInterval(t); }); keyHandler = null; },
+      };
+      current = me;
+      build(api);
+    });
+  }
+
+  document.addEventListener('keydown', e => {
+    if (!keyHandler || e.repeat) return;
+    const t = e.target instanceof Element ? e.target : null;
+    if (t && t.closest('textarea, input, .tools')) return;
+    if (['Shift', 'Control', 'Alt', 'Meta', 'Tab', 'CapsLock'].includes(e.key)) return;
+    const map = { ArrowLeft: 'left', ArrowDown: 'down', ArrowRight: 'right' };
+    if (map[e.key] || e.key === 'ArrowUp' || e.key === ' ') e.preventDefault();  // don't scroll the page
+    keyHandler(map[e.key] || e.key.toLowerCase(), e);
+  });
+  keypad.addEventListener('click', e => { const b = e.target.closest('[data-key]'); if (b && keyHandler) keyHandler(b.dataset.key); });
+  $('#skip').addEventListener('click', () => { if (current) current.finish(current.skipValue); });
+  $('#restart').addEventListener('click', () => start());
+
+  // ---------- building blocks ----------
+  function el(tag, attrs = {}, ...kids) {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (k === 'class') n.className = v; else if (k === 'text') n.textContent = v;
+      else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else n.setAttribute(k, v);
+    }
+    kids.flat().forEach(k => k != null && n.append(k));
+    return n;
+  }
+  const P = (text, cls = '') => el('p', { class: cls, text });
+  function contButton(api, visible = true, value) {
+    const b = el('button', { class: 'cont', type: 'button', text: 'Click to continue', onclick: () => api.finish(value) });
+    b.hidden = !visible;
+    return b;
+  }
+  const reveal = b => { b.hidden = false; };
+
+  function rating(labels, { radio = false, label = '' } = {}, onChange) {
+    const n = labels.length;
+    const wrap = el('div', { class: 'scale' + (radio ? ' radio' : ''), role: 'radiogroup', 'aria-label': label });
+    wrap.style.setProperty('--n', n);
+    const row = el('div', { class: 'row' });
+    const opts = labels.map((lab, i) => el('button', {
+      class: 'opt', type: 'button', role: 'radio', 'aria-checked': 'false', 'aria-label': (lab || `Point ${i + 1}`).replace('\n', ' '),
+      onclick: () => { opts.forEach(o => o.setAttribute('aria-checked', 'false')); opts[i].setAttribute('aria-checked', 'true'); onChange(radio ? lab : i + 1); },
+    }));
+    row.append(...opts);
+    wrap.append(row, el('div', { class: 'labels' }, labels.map(l => el('span', { text: l }))));
+    return wrap;
+  }
+
+  const FACES = {
+    unhappy: '<circle cx="25" cy="25" r="21"/><circle cx="18" cy="20" r="2" class="f"/><circle cx="32" cy="20" r="2" class="f"/><path d="M15 36 Q25 27 35 36"/>',
+    happy: '<circle cx="25" cy="25" r="21"/><circle cx="18" cy="20" r="2" class="f"/><circle cx="32" cy="20" r="2" class="f"/><path d="M15 30 Q25 40 35 30"/>',
+    sleepy: '<circle cx="25" cy="25" r="21"/><path d="M14 21 Q18 24 22 21M28 21 Q32 24 36 21M19 33 H31"/>',
+    awake: '<circle cx="25" cy="25" r="21"/><circle cx="18" cy="20" r="4"/><circle cx="32" cy="20" r="4"/><circle cx="25" cy="33" r="3.5"/>',
+  };
+  const face = kind => { const s = el('span'); s.innerHTML = `<svg viewBox="0 0 50 50" aria-hidden="true" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round">${FACES[kind]}</svg>`.replace(/class="f"/g, 'fill="#fff" stroke="none"'); return s.firstChild; };
+
+  function continuous(trackLabel, onChange) {
+    const track = el('div', { class: 'track', tabindex: '0', role: 'slider', 'aria-label': trackLabel, 'aria-valuemin': '0', 'aria-valuemax': '100' });
+    let thumb = null, value = null;
+    const set = v => {
+      value = Math.max(0, Math.min(1, v));
+      if (!thumb) { thumb = el('span', { class: 'thumb' }); track.append(thumb); }
+      thumb.style.left = (value * 100) + '%';
+      track.setAttribute('aria-valuenow', Math.round(value * 100));
+      onChange(value);
+    };
+    const fromEvent = e => { const r = track.getBoundingClientRect(); set((e.clientX - r.left) / r.width); };
+    track.addEventListener('pointerdown', e => { track.setPointerCapture(e.pointerId); fromEvent(e); });
+    track.addEventListener('pointermove', e => { if (track.hasPointerCapture(e.pointerId)) fromEvent(e); });
+    track.addEventListener('keydown', e => {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); e.stopPropagation(); set((value ?? 0.5) + (e.key === 'ArrowRight' ? 0.05 : -0.05)); }
+    });
+    return track;
+  }
+  function affective(kind, onChange) {
+    const [lo, hi, name] = kind === 'valence' ? ['unhappy', 'happy', 'Unhappy to happy'] : ['sleepy', 'awake', 'Sleepy to wide awake'];
+    return el('div', { class: 'aff' }, face(lo),
+      el('div', { class: 'mid' }, el('div', { class: 'cue', 'aria-hidden': 'true' }, el('span'), el('span')), continuous(name, onChange)),
+      face(hi));
+  }
+
+  // ---------- screens ----------
+  const delayNote = (study, demo) => `Continue appears after ${study} s in the study (${demo} s here).`;
+
+  const intro = () => show(api => {
+    api.el.append(
+      el('div', { class: 'eyebrow', text: 'Before you start' }),
+      el('h2', { text: 'Walk through the study as a participant' }),
+      el('ul', {},
+        el('li', { text: 'This follows one full block of the experiment (the "no effect" condition with the colour Stroop task), then summarises the other two blocks.' }),
+        el('li', { text: 'Videos and the audio check are shown as placeholders. Long waits are shortened; the line under the screen gives the real timing.' }),
+        el('li', { text: 'Respond with the mouse, and the arrow keys for the Stroop task (or the buttons that appear under the screen). Use Skip screen to move on at any point.' }),
+        el('li', { text: 'Nothing you enter is recorded.' })),
+      el('div', { class: 'actions' }, el('button', { class: 'btn primary', type: 'button', text: 'Start walkthrough', onclick: () => api.finish() })));
+  }, { narrate: true });
+
+  const volumeTest = () => show(api => {
+    const cont = contButton(api, false);
+    const slot = el('div', { class: 'group' }, el('button', { class: 'play', type: 'button', 'aria-label': 'Play audio check', onclick: () => {
+      slot.replaceChildren(el('div', { class: 'ph', style: 'aspect-ratio:auto;padding:4% 0' }, '(audio clip of people speaking plays)', el('small', { text: 'Participants adjust the volume until they can hear it clearly' })));
+      reveal(cont);
+    } }));
+    api.el.append(P("In this experiment, you will watch videos that have audio tracks. It's important that you can hear the audio properly.\n\nClick the button below to play track of people speaking. Adjust the volume until you can clearly and comfortably hear what they are saying and then press continue."), slot, cont);
+  }, { note: 'Audio check. Continue appears once the clip has been played.' });
+
+  const baseline = () => show(api => {
+    const cont = contButton(api, false); const ans = {};
+    const check = () => { if (ans.a && ans.b) reveal(cont); };
+    api.el.append(
+      P('In this study you will complete some cognitive tasks. These are short computer tasks that measure things like attention, memory and how quickly you can respond.\n\nBefore we begin, please answer the following questions.'),
+      el('div', { class: 'group' }, P('How do you think experiencing intense emotions affects your performance on tasks like these?'),
+        rating(['Greatly\nimpairs', '', '', 'No effect', '', '', 'Greatly\nimproves'], { label: 'Emotion and performance' }, v => { ans.a = v; check(); })),
+      el('div', { class: 'group' }, P('How much can people control how intensely they feel emotions?'),
+        rating(['Not at all', '', '', '', '', '', 'Completely'], { label: 'Control over emotions' }, v => { ans.b = v; check(); })),
+      cont);
+  }, { note: 'Baseline beliefs. Continue appears once both questions are answered.' });
+
+  const timedText = (text, study, demo, extra = {}) => show(api => {
+    const cont = contButton(api, false);
+    api.el.append(P(text, extra.cls || ''), cont);
+    api.after(demo * 1000, () => reveal(cont));
+  }, { note: study === demo ? `Continue appears after ${study} s.` : delayNote(study, demo) });
+
+  const INSTRUCTIONS = 'You are about to watch a set of emotional videos. Immediately afterwards, you will complete a task in which colour words such as RED, GREEN or BLUE appear in different ink colours, and you respond to the ink colour while ignoring the word. The better you do, the larger your financial reward.\n\nResearch has found that intense emotions raise arousal and release adrenaline, but this neither sharpens nor disrupts the ability to ignore distractions, the skill this task depends on.\n\nThis means that experiencing intense emotions while watching the upcoming set of videos will have no effect on your performance on the task.';
+  const TOLD = 'I was told that experiencing intense emotions while watching the upcoming set of videos would ___ my performance on the task.';
+
+  const questions = () => show(api => {
+    const ans = {}; const cont = el('button', { class: 'cont', type: 'button', text: 'Click to continue', onclick: () => api.finish(ans.told === 'Have no effect on') });
+    cont.hidden = true;
+    const check = () => { if (ans.m && ans.told && ans.b) reveal(cont); };
+    api.el.append(
+      el('div', { class: 'group' }, P('Please answer the following questions:\n\nI am motivated to perform well in the upcoming cognitive task.'),
+        rating(['Strongly Disagree', '', '', '', '', '', 'Strongly Agree'], { label: 'Motivation' }, v => { ans.m = v; check(); })),
+      el('div', { class: 'group' }, P(TOLD), rating(['Impair', 'Have no effect on', 'Improve'], { radio: true, label: 'What you were told' }, v => { ans.told = v; check(); })),
+      el('div', { class: 'group' }, P('How do you think experiencing intense emotions while watching the upcoming set of videos will affect your performance on the task?'),
+        rating(['Greatly\nimpairs', '', '', 'No effect', '', '', 'Greatly\nimproves'], { label: 'Your belief' }, v => { ans.b = v; check(); })),
+      cont);
+    api.el.style.gap = 'calc(var(--h) * 2.6)';
+  }, { note: 'Comprehension check: a wrong answer to the "I was told" question sends the participant back to the information page.', skipValue: true });
+
+  const incorrect = () => timedText(`You answered the following question incorrectly:\n\n"${TOLD}"\n\nOn the next page you will see the information again. Please read it carefully, then answer the questions again.`, 2, 2);
+
+  const affectNow = () => show(api => {
+    const cont = contButton(api, false); const ans = {};
+    const check = () => { if (ans.a != null && ans.v != null) reveal(cont); };
+    api.el.append(P('After watching each video, you will rate how you felt using the following two scales.\n\nHow do you feel right now?'),
+      affective('arousal', v => { ans.a = v; check(); }), affective('valence', v => { ans.v = v; check(); }), cont);
+  }, { note: 'Practice with the two rating scales (sleepy to wide awake, unhappy to happy). Click or drag on a line.' });
+
+  const video = () => show(api => {
+    const fill = el('i');
+    api.el.append(el('div', { class: 'ph' }, el('span', { text: '(video plays)' }), el('small', { text: 'An emotional video clip with sound' }), el('div', { class: 'bar-fill' }, fill)));
+    requestAnimationFrame(() => { fill.style.transition = 'width 4s linear'; fill.style.width = '100%'; });
+    api.after(4000, () => api.finish());
+  }, { note: 'Placeholder for a video clip. It moves on by itself.' });
+
+  const fixation = () => show(api => {
+    api.el.append(el('div', { class: 'cross', text: '+', 'aria-label': 'Fixation cross' }));
+    api.after(2000, () => api.finish());
+  }, { note: 'Fixation cross after each video: 7 s in the study (2 s here).' });
+
+  const affectRating = kind => show(api => {
+    const cont = contButton(api, false); const ans = {};
+    const conf = el('div', { class: 'group' });
+    const check = () => { if (ans.r != null && (kind === 'valence' || ans.c != null)) reveal(cont); };
+    api.el.append(P('How did you feel whilst watching this video?'), affective(kind, v => {
+      ans.r = v;
+      if (kind === 'arousal' && !conf.childElementCount) {
+        conf.append(P('How confident are you?'), el('div', { class: 'aff', style: 'grid-template-columns:1fr' },
+          el('div', { class: 'mid' }, continuous('Confidence', c => { ans.c = c; check(); }), el('div', { class: 'ends' }, el('span', { text: '0' }), el('span', { text: '100' })))));
+      }
+      check();
+    }), conf, cont);
+  }, { note: kind === 'valence' ? 'Rating 1 of 2 after each video: unhappy to happy.' : 'Rating 2 of 2: sleepy to wide awake, then confidence in that rating.' });
+
+  const effort = () => show(api => {
+    const cont = contButton(api, false);
+    api.el.append(P('How effortful was it to watch the video?'),
+      el('div', { class: 'aff', style: 'grid-template-columns:1fr' }, el('div', { class: 'mid' },
+        continuous('Effort', () => reveal(cont)), el('div', { class: 'ends' }, el('span', { text: 'No effort' }), el('span', { text: 'A lot of effort', style: 'text-align:right' })))),
+      cont);
+  }, { note: 'Effort rating after each video.' });
+
+  const attention = q => show(api => {
+    api.el.append(P(q, 'lg'), el('div', { class: 'boxes' },
+      el('button', { type: 'button', text: 'Yes', onclick: () => api.finish('y') }),
+      el('button', { type: 'button', text: 'No', onclick: () => api.finish('n') })));
+  }, { note: 'Attention check about the video just shown (the walkthrough has no real video, so any answer is fine).' });
+
+  const postChecks = () => show(api => {
+    const cont = contButton(api, false); const ans = {};
+    const check = () => { if (ans.a && ans.e) reveal(cont); };
+    api.el.append(
+      el('div', { class: 'group' }, P('While watching the videos, did you try to change how intensely you felt?'),
+        rating(['Tried to feel less', 'Did not try to change it', 'Tried to feel more'], { radio: true, label: 'Attempt to change feelings' }, v => { ans.a = v; check(); })),
+      el('div', { class: 'group' }, P('How much effort did you put into changing how you felt?'),
+        rating(['None', '', '', '', '', '', 'A great deal'], { label: 'Effort to change feelings' }, v => { ans.e = v; check(); })),
+      cont);
+  }, { note: 'Questions after the full set of videos.' });
+
+  const typed = (text, study, demo) => show(api => {
+    const cont = contButton(api, false);
+    api.el.append(P(text), el('textarea', { id: 'answer-' + study, 'aria-label': 'Your answer' }), cont);
+    api.after(demo * 1000, () => reveal(cont));
+  }, { note: `Free-text answer. Continue appears after ${study} s. Nothing typed here is saved.` });
+
+  const anyKey = (text, note, delay = 0) => show(api => {
+    api.el.append(P(text, 'left'));
+    const go = () => api.finish();
+    api.after(delay, () => { api.onKey(go); stage.onclick = go; });
+  }, { note, keys: false });
+
+  // ----- colour Stroop -----
+  const ROWS = [
+    { text: 'red', color: 'red', key: 'left' }, { text: 'red', color: 'green', key: 'down' },
+    { text: 'green', color: 'green', key: 'down' }, { text: 'green', color: 'blue', key: 'right' },
+    { text: 'blue', color: 'blue', key: 'right' }, { text: 'blue', color: 'red', key: 'left' },
+  ];
+  const INK = { red: '#ff0000', green: '#008000', blue: '#0000ff' };
+  const KEYNAME = { left: 'Left', down: 'Down', right: 'Right' };
+  const KEYS_LINE = 'Left = red          Down = green          Right = blue';
+  const TARGET_LINE = 'Respond to the COLOUR of the letters, not the word';
+  const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const practiceExtras = api => api.el.append(el('div', { class: 'pin-top', text: TARGET_LINE }), el('div', { class: 'pin-bottom', text: KEYS_LINE }));
+
+  const stroopTrial = (row, practice, i, n) => show(api => {
+    if (practice) practiceExtras(api);
+    api.after(500, () => {
+      api.el.append(el('div', { class: 'word', text: row.text, style: `color:${INK[row.color]}` }));
+      api.onKey(k => { if (KEYNAME[k]) api.finish(k === row.key); });
+    });
+  }, { keys: true, skipValue: true, note: practice ? `Practice trial ${i} of ${n} (18 in the study). Arrow keys or the buttons below.` : `Task trial ${i} of ${n} (30 in the study). No reminders or feedback now.` });
+
+  const feedback = (row, correct) => show(api => {
+    practiceExtras(api);
+    api.el.append(P(correct ? 'Correct!' : `Incorrect\n\nThe letters were ${row.color}, so the correct key was ${KEYNAME[row.key]}`, 'lg'));
+    api.after(1500, () => api.finish());
+  }, { keys: true, note: 'Feedback is shown for 1.5 s after each practice trial.' });
+
+  const REMIND = 'Remember, ignore the word itself; press:\nLeft for red LETTERS\nDown for green LETTERS\nRight for blue LETTERS';
+
+  async function colourStroop() {
+    await anyKey('In this task you need to identify the colour of the word on the screen whilst ignoring the actual word itself. \n\nYou will use the arrow keys on the keyboard to indicate what colour the word on the screen is.\n\nRemeber, ignore the word itself; press:\nLeft for red LETTERS\nDown for green LETTERS\nRight for blue LETTERS\n\nBefore the task starts, you will complete 18 practice trials. During the practice, the keys will be shown at the bottom of the screen.\n\nPress any key to begin the practice',
+      'Press any key (or click the screen) to continue.');
+    const n = ROWS.length, pass = 5;   // study: 18 trials, pass mark 14 (about 75%)
+    for (let round = 0; round < 2; round++) {
+      let correct = 0, i = 0;
+      for (const row of shuffle(ROWS)) {
+        const ok = await stroopTrial(row, true, ++i, n);
+        if (ok) correct++;
+        await feedback(row, ok);
+      }
+      if (correct >= pass || round === 1) break;
+      await anyKey(`You got ${correct} out of ${n} practice trials correct.\n\nYou will now do the practice trials again.\n\n${REMIND}\n\nPress any key to begin the practice`,
+        `Fewer than ${pass} of ${n} correct, so the practice repeats once (study: fewer than 14 of 18).`, 1000);
+    }
+    await anyKey(`The practice is now finished.\n\nThe real task will now begin. The keys will no longer be shown on the screen.\n\n${REMIND}\n\nPress any key to begin the task`,
+      'Press any key (or click the screen). Keys are ignored for the first second.', 1000);
+    let i = 0;
+    for (const row of shuffle(ROWS)) await stroopTrial(row, false, ++i, ROWS.length);
+  }
+
+  const rest = () => show(api => {
+    let left = 5; const count = P(`${left} seconds`);
+    api.el.append(P('You have completed this section of the experiment!\n\nPlease take a short break..'), count);
+    api.every(1000, () => { left--; count.textContent = `${Math.max(left, 0)} seconds`; if (left <= 0) api.finish(); });
+  }, { note: 'Break: 60 s countdown in the study (5 s here).' });
+
+  const otherBlocks = () => show(api => {
+    api.el.append(
+      el('div', { class: 'eyebrow', text: 'Rest of the study' }),
+      el('h2', { text: 'Two more blocks follow, with the same structure' }),
+      el('ul', {},
+        el('li', { text: 'Each block starts with its own information page, the same three questions (with the comprehension check), the "How do you feel right now?" scales and "Ready to begin?".' }),
+        el('li', { text: '"Improve" block: participants are told intense emotions will improve their performance, then do an emotional face task (identify fearful or happy faces while ignoring a word written across them), with 12 practice trials.' }),
+        el('li', { text: '"Impair" block: participants are told intense emotions will impair their performance, then do a block-sequence memory task (Corsi blocks: click the blocks in the order they flashed).' }),
+        el('li', { text: 'Every block has its own set of videos, each followed by the ratings, effort and attention questions. The order of the three blocks varies between participants.' })),
+      el('div', { class: 'actions' }, el('button', { class: 'btn primary', type: 'button', text: 'Go to the end of the study', onclick: () => api.finish() })));
+  }, { narrate: true });
+
+  const theEnd = () => show(api => {
+    api.el.append(P('Thank you!\n\nThat is the end of the experiment.\n\nPlease let the experimenter know you have completed the study.', 'lg'));
+    api.after(4000, () => api.finish());
+  }, { note: 'Final screen: 15 s in the study (4 s here).' });
+
+  const done = () => show(api => {
+    api.el.append(
+      el('div', { class: 'eyebrow', text: 'End of walkthrough' }),
+      el('h2', { text: "That's the participant's experience" }),
+      el('p', { text: 'A full session runs three blocks of instructions, videos, questions and a cognitive task, plus the setup and end questions shown here.' }),
+      el('div', { class: 'actions' }, el('button', { class: 'btn primary', type: 'button', text: 'Start again', onclick: () => start() })));
+  }, { narrate: true });
+
+  // ---------- the session ----------
+  async function run() {
+    section('Setup');
+    await intro();
+    await volumeTest();
+    await baseline();
+    await timedText('In this experiment, you will complete three different cognitive tasks. In addition to receiving course credit, you can earn a financial reward. The better you perform on the cognitive tasks, the larger your financial reward.\n\nBefore each cognitive task, you will watch a set of emotional videos for about 10 minutes. These videos are designed to influence your emotional state.', 10, 3);
+
+    section('Instructions');
+    for (;;) {
+      await timedText(INSTRUCTIONS, 20, 3, { cls: 'left' });
+      if (await questions()) break;
+      await incorrect();
+    }
+    await affectNow();
+    await timedText('Ready to begin?', 1, 1, { cls: 'lg' });
+
+    section('Videos');
+    for (const q of ['Were the people in the video fighting?', 'Were the people in the video laughing?']) {
+      await video();
+      await fixation();
+      await affectRating('valence');
+      await affectRating('arousal');
+      await effort();
+      await attention(q);
+    }
+
+    section('After the videos');
+    await postChecks();
+    await typed('What, if anything, did you do to change how you felt while watching the videos?\n\nClick in the box and type your answer, then click continue. If you did nothing, type "nothing".', 3, 3);
+    await timedText('Thank you for watching the videos. That part of the experiment is now complete.\n\nNext, you will be moving on to a cognitive task. Your performance in this task will determine the financial reward you receive. The better you perform, the higher your reward.\n\nPlease take your time, focus, and do your best. Good luck!', 4, 4);
+
+    section('Colour Stroop');
+    await colourStroop();
+    await rest();
+
+    section('Rest of the study');
+    await otherBlocks();
+
+    section('End');
+    await typed('What do you think this study was testing?\n\nClick in the box and type your answer, then click continue.', 3, 3);
+    await theEnd();
+    await done();
+  }
+
+  function start() {
+    if (current) current.cancel();
+    stage.onclick = null;
+    run().catch(e => { if (!(e instanceof Cancelled)) console.error(e); });
+  }
+  // clear the any-key click handler whenever a new screen starts
+  const _show = show;
+  show = (b, o) => { stage.onclick = null; return _show(b, o); };
+  start();
+})();
+</script>
