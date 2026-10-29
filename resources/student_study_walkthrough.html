@@ -54,6 +54,7 @@ body {
   border: 1px solid var(--line); background: var(--panel); color: var(--fg);
 }
 .btn:hover { border-color: var(--accent); }
+.btn:disabled { opacity: 0.45; cursor: default; border-color: var(--line); }
 .btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
 .btn:focus-visible, .stage :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
@@ -120,6 +121,19 @@ body {
 .pin-bottom { bottom: calc(var(--h) * 4.5); }
 .cross { font-size: calc(var(--h) * 10); line-height: 1; }
 
+/* emotional face task: placeholder greyscale photo (1.11 x 0.75 height units) with a red word across it */
+.facepic { position: relative; width: calc(var(--h) * 111); max-width: 100%; aspect-ratio: 1.11 / 0.75; display: grid; place-items: center; }
+.facepic svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.emoword { position: relative; color: #ff0000; font: calc(var(--h) * 10) / 1 Arial, Helvetica, sans-serif; margin-top: calc(var(--h) * 2); }
+
+/* Corsi blocks, placed in PsychoPy height units from the screen centre */
+.corsi { position: absolute; inset: 0; container-type: size; }
+.corsi .blk, .corsi .submit { --u: min(1cqh, 0.5625cqw); position: absolute; transform: translate(-50%, -50%); }
+.corsi .blk { width: calc(var(--u) * 10); height: calc(var(--u) * 10); left: calc(50% + var(--x) * var(--u)); top: calc(50% - var(--y) * var(--u)); background: #fff; border: 0; padding: 0; }
+.corsi button.blk { cursor: pointer; }
+.corsi .blk.on { background: #ff0000; }
+.corsi .submit { left: calc(50% + 50 * var(--u)); top: calc(50% + 40 * var(--u)); width: calc(var(--u) * 20); height: calc(var(--u) * 10); background: #000; color: #fff; border: 2px solid #fff; font: calc(var(--u) * 5) / 1 Arial, Helvetica, sans-serif; cursor: pointer; }
+
 /* placeholders */
 .ph {
   width: calc(var(--h) * 120); max-width: 100%; aspect-ratio: 16 / 9; display: grid; place-items: center; align-content: center; gap: calc(var(--h) * 2);
@@ -128,11 +142,6 @@ body {
 .ph small { font-size: calc(var(--h) * 2.8); color: #a9a9a9; }
 .bar-fill { width: calc(var(--h) * 60); height: calc(var(--h) * 0.8); background: #555; border-radius: 99px; overflow: hidden; }
 .bar-fill i { display: block; height: 100%; width: 0; background: #d9d9d9; }
-.play { width: calc(var(--h) * 12); height: calc(var(--h) * 12); border-radius: 50%; border: 2px solid var(--screen-fg); background: transparent; cursor: pointer; display: grid; place-items: center; }
-.play::before { content: ""; border-left: calc(var(--h) * 4) solid var(--screen-fg); border-top: calc(var(--h) * 2.4) solid transparent; border-bottom: calc(var(--h) * 2.4) solid transparent; margin-left: calc(var(--h) * 1); }
-.boxes { display: flex; gap: calc(var(--h) * 12); }
-.boxes button { width: calc(var(--h) * 22); height: calc(var(--h) * 10); font: inherit; font-size: calc(var(--h) * 4); color: var(--screen-fg); background: transparent; border: 2px solid var(--screen-fg); cursor: pointer; }
-.boxes button:hover { background: rgba(255, 255, 255, 0.12); }
 textarea {
   width: calc(var(--h) * 110); max-width: 100%; height: calc(var(--h) * 22); resize: none;
   font: calc(var(--h) * 3.4) / 1.35 var(--font-screen); color: #111; background: #fff; border: 0; padding: calc(var(--h) * 1.6);
@@ -147,6 +156,10 @@ textarea {
 .narrate .eyebrow { font-family: var(--font-mono); font-size: calc(var(--h) * 2.6); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
 .narrate .btn { font-size: calc(var(--h) * 3.2); padding: calc(var(--h) * 2) calc(var(--h) * 3.4); }
 .narrate .actions { display: flex; gap: calc(var(--h) * 2); }
+.choose { display: grid; gap: calc(var(--h) * 1.2); }
+.choose small { color: var(--muted); font-size: calc(var(--h) * 2.7); }
+.seg { display: flex; gap: calc(var(--h) * 1.2); flex-wrap: wrap; }
+.seg .btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
 
 /* under the screen */
 .note { margin: 0; min-height: 1.5em; font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); text-align: center; }
@@ -158,7 +171,6 @@ textarea {
   .stage { aspect-ratio: auto; min-height: 72vh; width: 100%; container-type: inline-size; display: flex; }
   .screen { --h: 4px; position: relative; flex: 1; padding: 52px 14px; }
   .pin-top, .pin-bottom { white-space: normal; padding-inline: 10px; }
-  .boxes { gap: 24px; }
 }
 @media (prefers-reduced-motion: reduce) { .bar-fill i { transition: none !important; } }
 </style>
@@ -170,6 +182,7 @@ textarea {
       <p class="sub">Click through what a participant sees. Videos and faces are placeholders, and nothing you enter is saved.</p>
     </div>
     <div class="tools">
+      <button class="btn" id="back" type="button" title="Go back to the previous screen" disabled>&#8592; Back</button>
       <button class="btn" id="skip" type="button" title="Jump to the next screen, like Tab in pilot mode">Skip screen</button>
       <button class="btn" id="restart" type="button">Restart</button>
     </div>
@@ -177,11 +190,7 @@ textarea {
   <ol class="steps" id="steps" aria-label="Sections"></ol>
   <div class="stage" id="stage"><div class="screen" id="screen"></div></div>
   <p class="note" id="note" aria-live="polite"></p>
-  <div class="keypad" id="keypad" hidden>
-    <button class="btn" type="button" data-key="left">&#8592; Left</button>
-    <button class="btn" type="button" data-key="down">&#8595; Down</button>
-    <button class="btn" type="button" data-key="right">&#8594; Right</button>
-  </div>
+  <div class="keypad" id="keypad" hidden></div>
 </div>
 
 <script>
@@ -189,7 +198,9 @@ textarea {
   const $ = (s, el = document) => el.querySelector(s);
   const stage = $('#stage'), screenEl = $('#screen'), noteEl = $('#note'), keypad = $('#keypad');
 
-  const SECTIONS = ['Setup', 'Instructions', 'Videos', 'After the videos', 'Colour Stroop', 'Rest of the study', 'End'];
+  const SECTIONS = ['Setup', 'Block 1: no effect', 'Block 2: improve', 'Block 3: impair', 'End'];
+  const ARROW_KEYS = [['left', '← Left'], ['down', '↓ Down'], ['right', '→ Right']];
+  const FACE_KEYS = [['f', 'F (fearful)'], ['h', 'H (happy)']];
   const stepsEl = $('#steps');
   SECTIONS.forEach(s => { const li = document.createElement('li'); li.textContent = s; stepsEl.appendChild(li); });
   function section(name) {
@@ -202,14 +213,26 @@ textarea {
   let current = null;          // { finish, cancel, skipValue }
   let keyHandler = null;
 
-  function show(build, { narrate = false, note = '', keys = false, skipValue } = {}) {
+  // Back works by replaying the session from the start: screens before the target
+  // return the answer given last time without being shown. Screens that move on by
+  // themselves (fixation, feedback, countdowns) are passed over when going back.
+  const history = [];          // { value, auto } for each finished screen, in order
+  let pos = 0, replayTo = 0, shownAt = 0;
+  const backTarget = () => { for (let j = shownAt - 1; j >= 0; j--) if (history[j] && !history[j].auto) return j; return -1; };
+
+  function show(build, { narrate = false, note = '', keys = false, skipValue, auto = false } = {}) {
+    const idx = pos++;
+    if (idx < replayTo) return Promise.resolve(history[idx].value);
+    shownAt = idx;
     if (current) current.cleanup();
     return new Promise((resolve, reject) => {
+      $('#back').disabled = backTarget() < 0;
       const timers = [];
       screenEl.replaceChildren();
       stage.classList.toggle('narrate', narrate);
       noteEl.textContent = note;
       keypad.hidden = !keys;
+      if (keys) keypad.replaceChildren(...keys.map(([k, label]) => el('button', { class: 'btn', type: 'button', 'data-key': k, text: label })));
       keyHandler = null;
       const api = {
         el: screenEl,
@@ -217,7 +240,7 @@ textarea {
         every(ms, fn) { timers.push(setInterval(fn, ms)); },
         onKey(fn) { keyHandler = fn; },
         note(t) { noteEl.textContent = t; },
-        finish(v) { me.cleanup(); current = null; resolve(v); },
+        finish(v) { me.cleanup(); current = null; history.length = idx; history.push({ value: v, auto }); resolve(v); },
       };
       const me = {
         skipValue,
@@ -242,6 +265,7 @@ textarea {
   keypad.addEventListener('click', e => { const b = e.target.closest('[data-key]'); if (b && keyHandler) keyHandler(b.dataset.key); });
   $('#skip').addEventListener('click', () => { if (current) current.finish(current.skipValue); });
   $('#restart').addEventListener('click', () => start());
+  $('#back').addEventListener('click', () => { const j = backTarget(); if (j >= 0) start(j); });
 
   // ---------- building blocks ----------
   function el(tag, attrs = {}, ...kids) {
@@ -309,28 +333,30 @@ textarea {
   }
 
   // ---------- screens ----------
+  // which version of the information pages to show: 'noStrategy' (timing group) or 'strategy'
+  let group = 'noStrategy';
+  const GROUP_HELP = 'Participants are allocated to one of two versions. The strategy version adds a tip to each information page on how they can regulate their emotional response.';
+
   const delayNote = (study, demo) => `Continue appears after ${study} s in the study (${demo} s here).`;
 
   const intro = () => show(api => {
+    const opts = [['noStrategy', 'No strategy'], ['strategy', 'Strategy']].map(([g, label]) =>
+      el('button', { class: 'btn', type: 'button', 'data-group': g, text: label, onclick: () => pick(g) }));
+    const pick = g => { group = g; opts.forEach(o => o.setAttribute('aria-pressed', String(o.dataset.group === g))); };
+    pick(group);
     api.el.append(
       el('div', { class: 'eyebrow', text: 'Before you start' }),
       el('h2', { text: 'Walk through the study as a participant' }),
       el('ul', {},
-        el('li', { text: 'This follows one full block of the experiment (the "no effect" condition with the colour Stroop task), then summarises the other two blocks.' }),
-        el('li', { text: 'Videos and the audio check are shown as placeholders. Long waits are shortened; the line under the screen gives the real timing.' }),
-        el('li', { text: 'Respond with the mouse, and the arrow keys for the Stroop task (or the buttons that appear under the screen). Use Skip screen to move on at any point.' }),
+        el('li', { text: 'This follows all three blocks of the experiment: "no effect" (colour Stroop task), "improve" (emotional face task) and "impair" (block-sequence memory task).' }),
+        el('li', { text: 'The real stimuli used in the experiment are replaced by placeholders in this link. Each video watching block shows 2 videos instead of the 40 videos participants see in the lab, and cognitive tasks are shortened so that you can move through the task quickly.' }),
         el('li', { text: 'Nothing you enter is recorded.' })),
-      el('div', { class: 'actions' }, el('button', { class: 'btn primary', type: 'button', text: 'Start walkthrough', onclick: () => api.finish() })));
+      el('div', { class: 'choose' },
+        el('span', { id: 'group-label', text: 'Information pages to show:' }),
+        el('div', { class: 'seg', role: 'group', 'aria-labelledby': 'group-label' }, opts),
+        el('small', { text: GROUP_HELP })),
+      el('div', { class: 'actions' }, el('button', { class: 'btn primary', type: 'button', text: 'Start walkthrough', onclick: () => api.finish(group) })));
   }, { narrate: true });
-
-  const volumeTest = () => show(api => {
-    const cont = contButton(api, false);
-    const slot = el('div', { class: 'group' }, el('button', { class: 'play', type: 'button', 'aria-label': 'Play audio check', onclick: () => {
-      slot.replaceChildren(el('div', { class: 'ph', style: 'aspect-ratio:auto;padding:4% 0' }, '(audio clip of people speaking plays)', el('small', { text: 'Participants adjust the volume until they can hear it clearly' })));
-      reveal(cont);
-    } }));
-    api.el.append(P("In this experiment, you will watch videos that have audio tracks. It's important that you can hear the audio properly.\n\nClick the button below to play track of people speaking. Adjust the volume until you can clearly and comfortably hear what they are saying and then press continue."), slot, cont);
-  }, { note: 'Audio check. Continue appears once the clip has been played.' });
 
   const baseline = () => show(api => {
     const cont = contButton(api, false); const ans = {};
@@ -350,11 +376,10 @@ textarea {
     api.after(demo * 1000, () => reveal(cont));
   }, { note: study === demo ? `Continue appears after ${study} s.` : delayNote(study, demo) });
 
-  const INSTRUCTIONS = 'You are about to watch a set of emotional videos. Immediately afterwards, you will complete a task in which colour words such as RED, GREEN or BLUE appear in different ink colours, and you respond to the ink colour while ignoring the word. The better you do, the larger your financial reward.\n\nResearch has found that intense emotions raise arousal and release adrenaline, but this neither sharpens nor disrupts the ability to ignore distractions, the skill this task depends on.\n\nThis means that experiencing intense emotions while watching the upcoming set of videos will have no effect on your performance on the task.';
   const TOLD = 'I was told that experiencing intense emotions while watching the upcoming set of videos would ___ my performance on the task.';
 
-  const questions = () => show(api => {
-    const ans = {}; const cont = el('button', { class: 'cont', type: 'button', text: 'Click to continue', onclick: () => api.finish(ans.told === 'Have no effect on') });
+  const questions = told => show(api => {
+    const ans = {}; const cont = el('button', { class: 'cont', type: 'button', text: 'Click to continue', onclick: () => api.finish(ans.told === told) });
     cont.hidden = true;
     const check = () => { if (ans.m && ans.told && ans.b) reveal(cont); };
     api.el.append(
@@ -386,7 +411,7 @@ textarea {
   const fixation = () => show(api => {
     api.el.append(el('div', { class: 'cross', text: '+', 'aria-label': 'Fixation cross' }));
     api.after(2000, () => api.finish());
-  }, { note: 'Fixation cross after each video: 7 s in the study (2 s here).' });
+  }, { auto: true, note: 'Fixation cross after each video: 7 s in the study (2 s here).' });
 
   const affectRating = kind => show(api => {
     const cont = contButton(api, false); const ans = {};
@@ -409,12 +434,6 @@ textarea {
         continuous('Effort', () => reveal(cont)), el('div', { class: 'ends' }, el('span', { text: 'No effort' }), el('span', { text: 'A lot of effort', style: 'text-align:right' })))),
       cont);
   }, { note: 'Effort rating after each video.' });
-
-  const attention = q => show(api => {
-    api.el.append(P(q, 'lg'), el('div', { class: 'boxes' },
-      el('button', { type: 'button', text: 'Yes', onclick: () => api.finish('y') }),
-      el('button', { type: 'button', text: 'No', onclick: () => api.finish('n') })));
-  }, { note: 'Attention check about the video just shown (the walkthrough has no real video, so any answer is fine).' });
 
   const postChecks = () => show(api => {
     const cont = contButton(api, false); const ans = {};
@@ -458,13 +477,13 @@ textarea {
       api.el.append(el('div', { class: 'word', text: row.text, style: `color:${INK[row.color]}` }));
       api.onKey(k => { if (KEYNAME[k]) api.finish(k === row.key); });
     });
-  }, { keys: true, skipValue: true, note: practice ? `Practice trial ${i} of ${n} (18 in the study). Arrow keys or the buttons below.` : `Task trial ${i} of ${n} (30 in the study). No reminders or feedback now.` });
+  }, { keys: ARROW_KEYS, skipValue: true, note: practice ? `Practice trial ${i} of ${n} (18 in the study). Arrow keys or the buttons below.` : `Task trial ${i} of ${n} (30 in the study). No reminders or feedback now.` });
 
   const feedback = (row, correct) => show(api => {
     practiceExtras(api);
     api.el.append(P(correct ? 'Correct!' : `Incorrect\n\nThe letters were ${row.color}, so the correct key was ${KEYNAME[row.key]}`, 'lg'));
     api.after(1500, () => api.finish());
-  }, { keys: true, note: 'Feedback is shown for 1.5 s after each practice trial.' });
+  }, { keys: ARROW_KEYS, auto: true, note: 'Feedback is shown for 1.5 s after each practice trial.' });
 
   const REMIND = 'Remember, ignore the word itself; press:\nLeft for red LETTERS\nDown for green LETTERS\nRight for blue LETTERS';
 
@@ -489,75 +508,248 @@ textarea {
     for (const row of shuffle(ROWS)) await stroopTrial(row, false, ++i, ROWS.length);
   }
 
+  // ----- emotional face task -----
+  const FACE_ROWS = [
+    { text: 'FEAR', face: 'fear', key: 'f' }, { text: 'HAPPY', face: 'happy', key: 'h' },
+    { text: 'HAPPY', face: 'fear', key: 'f' }, { text: 'FEAR', face: 'happy', key: 'h' },
+    { text: 'FEAR', face: 'fear', key: 'f' }, { text: 'HAPPY', face: 'fear', key: 'f' },
+  ];
+  const FACE_NAME = { fear: 'fearful', happy: 'happy' };
+  const FACE_SVG = {
+    fear: '<path d="M70 66 Q82 54 94 62M126 62 Q138 54 150 66"/><circle cx="84" cy="80" r="9" fill="#f2f2f2"/><circle cx="136" cy="80" r="9" fill="#f2f2f2"/><circle cx="84" cy="80" r="3" fill="#222" stroke="none"/><circle cx="136" cy="80" r="3" fill="#222" stroke="none"/><ellipse cx="110" cy="136" rx="13" ry="17" fill="#333"/>',
+    happy: '<path d="M72 68 Q84 62 96 68M124 68 Q136 62 148 68"/><path d="M76 82 Q84 74 92 82M128 82 Q136 74 144 82"/><path d="M84 124 Q110 152 136 124 Q110 134 84 124Z" fill="#f2f2f2"/>',
+  };
+  const facePic = row => {
+    const pic = el('div', { class: 'facepic', role: 'img', 'aria-label': `${FACE_NAME[row.face]} face with the word ${row.text}` });
+    pic.innerHTML = `<svg viewBox="0 0 220 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true" fill="none" stroke="#2a2a2a" stroke-width="3" stroke-linecap="round"><rect width="220" height="200" fill="#5c5c5c" stroke="none"/><ellipse cx="110" cy="100" rx="58" ry="74" fill="#b8b8b8" stroke="none"/>${FACE_SVG[row.face]}</svg>`;
+    pic.append(el('span', { class: 'emoword', text: row.text }));
+    return pic;
+  };
+  const FACE_KEYS_LINE = 'f = fearful          h = happy';
+  const FACE_TARGET_LINE = 'Respond to the emotion of the FACE, not the word';
+  const facePracticeExtras = api => api.el.append(el('div', { class: 'pin-top', text: FACE_TARGET_LINE }), el('div', { class: 'pin-bottom', text: FACE_KEYS_LINE }));
+  const FACE_REMIND = 'Remember, ignore the word; press:\nf for fearful FACES\nh for happy FACES';
+
+  const faceTrial = (row, practice, i, n) => show(api => {
+    if (practice) facePracticeExtras(api);
+    const untimed = practice && i <= n / 2;
+    api.after(1000, () => {
+      const pic = facePic(row);
+      api.el.append(pic);
+      if (!untimed) api.after(1000, () => pic.remove());
+      api.onKey(k => { if (k === 'f' || k === 'h') api.finish(k === row.key); });
+    });
+  }, { keys: FACE_KEYS, skipValue: true, note: practice
+    ? `Practice trial ${i} of ${n} (12 in the study). ` + (i <= n / 2 ? 'The face stays until you respond (first half of the practice).' : 'The face now disappears after 1 s, like the real task.')
+    : `Task trial ${i} of ${n} (30 in the study). The face shows for 1 s; respond with F or H.` });
+
+  const faceFeedback = (row, correct) => show(api => {
+    facePracticeExtras(api);
+    api.el.append(P(correct ? 'Correct!' : `Incorrect\n\nThe face was ${FACE_NAME[row.face]}, so the correct key was ${row.key}`, 'lg'));
+    api.after(1500, () => api.finish());
+  }, { keys: FACE_KEYS, auto: true, note: 'Feedback is shown for 1.5 s after each practice trial.' });
+
+  const countdown = () => show(api => {
+    let left = 3; const count = P(`${left} seconds`);
+    api.el.append(P('Please place your fingers on the f and h key, the task will begin in...'), count);
+    api.every(1000, () => { left--; count.textContent = `${Math.max(left, 0)} seconds`; if (left <= 0) api.finish(); });
+  }, { auto: true, note: 'Countdown: 10 s in the study (3 s here).' });
+
+  async function faceTask() {
+    await anyKey(`In this task you need to identify the emotion of the person in the image while ignoring the emotion word that is written on the screen. \n\nYou will use the f and h keys on the keyboard to indicate what emotion the face is showing.\n\n${FACE_REMIND}\n\nBefore the task starts, you will complete 12 practice trials. During the practice, the keys will be shown at the bottom of the screen.\n\nPress any key to begin the practice`,
+      'Press any key (or click the screen) to continue.');
+    const n = FACE_ROWS.length, pass = 5;   // study: 12 trials, pass mark 9
+    for (let round = 0; round < 2; round++) {
+      let correct = 0, i = 0;
+      for (const row of shuffle(FACE_ROWS)) {
+        const ok = await faceTrial(row, true, ++i, n);
+        if (ok) correct++;
+        await faceFeedback(row, ok);
+      }
+      if (correct >= pass || round === 1) break;
+      await anyKey(`You got ${correct} out of ${n} practice trials correct.\n\nYou will now do the practice trials again.\n\n${FACE_REMIND}\n\nPress any key to begin the practice`,
+        `Fewer than ${pass} of ${n} correct, so the practice repeats once (study: fewer than 9 of 12).`, 1000);
+    }
+    await anyKey(`The practice is now finished.\n\nThe real task will now begin. The keys will no longer be shown on the screen.\n\n${FACE_REMIND}\n\nPress any key to begin the task`,
+      'Press any key (or click the screen). Keys are ignored for the first second.', 1000);
+    await countdown();
+    let i = 0;
+    for (const row of shuffle(FACE_ROWS)) await faceTrial(row, false, ++i, FACE_ROWS.length);
+  }
+
+  // ----- Corsi block-sequence task -----
+  // the study's preset block positions (PsychoPy height units); 9 are picked at random each trial
+  const XYS = [[0.25625, 0.0975], [0.0675, 0.07375], [-0.09875, 0.065], [-0.26625, 0.235], [0.22, 0.2425], [0.16625, 0.3825], [-0.18625, 0.41125], [-0.01875, 0.235], [-0.3575, -0.05625], [-0.12125, -0.12625], [0.05875, -0.0575], [0.19375, -0.17125], [0.30125, -0.0175], [0.4125, -0.1325], [0.365, -0.27625], [-0.01125, -0.295], [-0.285, -0.27125], [-0.4075, 0.11875], [-0.485, 0.34625], [0.4625, 0.35875], [0.45375, 0.175], [0.54, 0.03625], [0.62875, -0.1825], [0.57875, -0.31375], [-0.45875, -0.3], [-0.55125, -0.13375], [-0.6025, 0.0725], [-0.675, 0.29875], [-0.68625, -0.225], [0.03125, -0.41], [0.1925, -0.295], [-0.16125, -0.28], [-0.24625, 0.04375], [-0.0225, 0.395], [0.28875, 0.39875], [0.6375, 0.27375], [-0.35125, 0.36625]];
+  const corsiField = (positions, tag = 'div') => {
+    const field = el('div', { class: 'corsi' });
+    const blocks = positions.map(([x, y], i) => el(tag, tag === 'button'
+      ? { class: 'blk', type: 'button', 'aria-label': `Block ${i + 1}`, style: `--x:${x * 100};--y:${y * 100}` }
+      : { class: 'blk', style: `--x:${x * 100};--y:${y * 100}` }));
+    field.append(...blocks);
+    return { field, blocks };
+  };
+
+  const corsiInstruct = () => show(api => {
+    const cont = contButton(api, false);
+    api.el.append(P('In this task you need to remember the order that the blocks light up. \n\nSome of the blocks will flash red. Once they have stoppd flashing, you must click the blocks in the order that they flashed.\n\nIt will start with 3 blocks. The more you get correct, the more blocks there will be to remember in the next iteration of the task.'), cont);
+    api.after(3000, () => reveal(cont));
+  }, { note: 'Continue appears after 3 s.' });
+
+  const corsiFixation = () => show(api => {
+    api.el.append(el('div', { class: 'cross', text: '+', 'aria-label': 'Fixation cross' }));
+    api.after(500, () => api.finish());
+  }, { auto: true, note: 'Fixation cross for 0.5 s before each sequence.' });
+
+  const corsiPresent = (positions, n) => show(api => {
+    const { field, blocks } = corsiField(positions);
+    api.el.append(field);
+    for (let i = 0; i < n; i++) {
+      api.after(i * 500, () => blocks[i].classList.add('on'));
+      api.after((i + 1) * 500, () => blocks[i].classList.remove('on'));
+    }
+    api.after(n * 500, () => api.finish());
+  }, { note: `Watch the order: ${n} blocks flash red one after another, 0.5 s each.` });
+
+  const corsiRespond = (positions, n) => show(api => {
+    const { field, blocks } = corsiField(positions, 'button');
+    const clicked = [];
+    const submit = el('button', { class: 'submit', type: 'button', text: 'Submit', onclick: () => api.finish(clicked.length === n && clicked.every((b, i) => b === i)) });
+    submit.hidden = true;
+    blocks.forEach((b, i) => b.addEventListener('click', () => {
+      if (clicked.includes(i)) return;
+      clicked.push(i); b.classList.add('on');
+      if (clicked.length >= n) submit.hidden = false;
+    }));
+    field.append(submit);
+    api.el.append(field);
+  }, { skipValue: true, note: `Click the blocks in the order they flashed. Submit appears once you have clicked ${n} blocks.` });
+
+  const corsiFeedback = correct => show(api => {
+    const msg = P(correct ? 'Correct!' : 'Incorrect!');
+    msg.style.color = correct ? '#008000' : '#ff0000';
+    api.el.append(msg);
+    api.after(1000, () => api.finish());
+  }, { auto: true, note: 'Feedback for 1 s. A correct sequence adds one block to the next one.' });
+
+  const corsiEnd = max => show(api => {
+    const cont = contButton(api, false);
+    api.el.append(P('Your maximum blocks remembered was: ' + max), cont);
+    api.after(3000, () => reveal(cont));
+  }, { note: 'Continue appears after 3 s.' });
+
+  async function corsiTask() {
+    await corsiInstruct();
+    let nBlocks = 3, wrong = 0;
+    const trials = 3;   // study: 5 sequences, ending early after a 4th wrong one
+    for (let t = 0; t < trials && wrong <= 3; t++) {
+      const positions = shuffle(XYS).slice(0, 9);
+      await corsiFixation();
+      await corsiPresent(positions, nBlocks);
+      const ok = await corsiRespond(positions, nBlocks);
+      await corsiFeedback(ok);
+      if (ok) nBlocks = Math.min(nBlocks + 1, 9); else wrong++;
+    }
+    await corsiEnd(nBlocks - 1);
+  }
+
   const rest = () => show(api => {
     let left = 5; const count = P(`${left} seconds`);
     api.el.append(P('You have completed this section of the experiment!\n\nPlease take a short break..'), count);
     api.every(1000, () => { left--; count.textContent = `${Math.max(left, 0)} seconds`; if (left <= 0) api.finish(); });
-  }, { note: 'Break: 60 s countdown in the study (5 s here).' });
+  }, { auto: true, note: 'Break: 60 s countdown in the study (5 s here).' });
 
-  const otherBlocks = () => show(api => {
+  // ----- the three blocks -----
+  // information pages as in instructions_timing_*.xlsx; the strategy version (instructions_strategy_*.xlsx) adds the tip
+  const BLOCKS = [
+    {
+      section: 'Block 1: no effect', label: 'No effect', taskName: 'colour Stroop task', task: colourStroop, told: 'Have no effect on',
+      about: 'Participants are told intense emotions will have no effect on their performance, then do the colour Stroop task: respond to the ink colour of a colour word while ignoring the word.',
+      tipNote: 'tells participants they do not need to do anything in particular while watching',
+      tip: 'You do not need to do anything in particular while watching. Simply watch each video as you normally would, and pay attention to what happens in it.',
+      instructions: 'You are about to watch a set of emotional videos. Immediately afterwards, you will complete a task in which colour words such as RED, GREEN or BLUE appear in different ink colours, and you respond to the ink colour while ignoring the word. The better you do, the larger your financial reward.\n\nResearch has found that intense emotions raise arousal and release adrenaline, but this neither sharpens nor disrupts the ability to ignore distractions, the skill this task depends on.\n\nThis means that experiencing intense emotions while watching the upcoming set of videos will have no effect on your performance on the task.',
+    },
+    {
+      section: 'Block 2: improve', label: 'Improve', taskName: 'emotional face task', task: faceTask, told: 'Improve',
+      about: 'Participants are told intense emotions will improve their performance, then do the emotional face task: say whether a face is fearful or happy while ignoring the emotion word written across it.',
+      tipNote: 'suggests a way to feel more intensely: watch each video as if you were there',
+      tip: 'One way to increase the intensity of your emotional response is to watch each video as if you were there. Imagine the events unfolding right in front of you, and focus on what the people in the video are seeing, hearing and feeling.',
+      instructions: 'You are about to watch a set of emotional videos. Immediately afterwards, you will complete a task in which you identify the emotion shown in photographs of faces as quickly and accurately as you can. The better you do, the larger your financial reward.\n\nResearch has found that intense emotions raise arousal and release adrenaline, which sharpens the ability to read facial expressions, the skill this task depends on.\n\nThis means that experiencing intense emotions while watching the upcoming set of videos will improve your performance on the task.',
+    },
+    {
+      section: 'Block 3: impair', label: 'Impair', taskName: 'block-sequence memory task', task: corsiTask, told: 'Impair',
+      about: 'Participants are told intense emotions will impair their performance, then do the block-sequence memory task (Corsi blocks): click the blocks in the order they flashed.',
+      tipNote: 'suggests a way to feel less intensely: watch each video as if from far away',
+      tip: 'One way to reduce the intensity of your emotional response is to watch each video as if from far away. Imagine the events unfolding at a distance, and focus on them as a neutral observer would.',
+      instructions: 'You are about to watch a set of emotional videos. Immediately afterwards, you will complete a task in which a set of blocks flash red one at a time and you click them in the same order. The sequences get longer as you go. The better you do, the larger your financial reward.\n\nResearch has found that intense emotions raise arousal and release adrenaline, which disrupts the ability to hold a sequence in memory, the skill this task depends on.\n\nThis means that experiencing intense emotions while watching the upcoming set of videos will impair your performance on the task.',
+    },
+  ];
+
+  const blockCard = (b, n) => show(api => {
     api.el.append(
-      el('div', { class: 'eyebrow', text: 'Rest of the study' }),
-      el('h2', { text: 'Two more blocks follow, with the same structure' }),
+      el('div', { class: 'eyebrow', text: `Block ${n} of 3` }),
+      el('h2', { text: `"${b.label}" block: ${b.taskName}` }),
       el('ul', {},
-        el('li', { text: 'Each block starts with its own information page, the same three questions (with the comprehension check), the "How do you feel right now?" scales and "Ready to begin?".' }),
-        el('li', { text: '"Improve" block: participants are told intense emotions will improve their performance, then do an emotional face task (identify fearful or happy faces while ignoring a word written across them), with 12 practice trials.' }),
-        el('li', { text: '"Impair" block: participants are told intense emotions will impair their performance, then do a block-sequence memory task (Corsi blocks: click the blocks in the order they flashed).' }),
-        el('li', { text: 'Every block has its own set of videos, each followed by the ratings, effort and attention questions. The order of the three blocks varies between participants.' })),
-      el('div', { class: 'actions' }, el('button', { class: 'btn primary', type: 'button', text: 'Go to the end of the study', onclick: () => api.finish() })));
+        el('li', { text: b.about }),
+        el('li', { text: group === 'strategy'
+          ? `You are seeing the strategy version: the information page also ${b.tipNote}.`
+          : `You are seeing the no-strategy version. In the strategy version, the information page also ${b.tipNote}.` }),
+        n === 1
+          ? el('li', { text: 'Every block has the same steps: an information page and questions, a set of videos with ratings after each one (40 videos in the study; two here), questions about the videos, the cognitive task and a short break.' })
+          : el('li', { text: 'The steps before the task are the same as in block 1, with a new information page and a new set of videos.' }),
+        n === 1 ? el('li', { text: 'The order of the three blocks varies between participants (six possible orders). This walkthrough uses no effect, then improve, then impair.' }) : null),
+      el('div', { class: 'actions' }, el('button', { class: 'btn primary', type: 'button', text: `Start block ${n}`, onclick: () => api.finish() })));
   }, { narrate: true });
+
+  async function runBlock(b, n) {
+    section(b.section);
+    await blockCard(b, n);
+    for (;;) {
+      await timedText(group === 'strategy' ? `${b.instructions}
+
+${b.tip}` : b.instructions, 20, 3, { cls: 'left' });
+      if (await questions(b.told)) break;
+      await incorrect();
+    }
+    await affectNow();
+    await timedText('Ready to begin?', 1, 1, { cls: 'lg' });
+
+    for (let v = 0; v < 2; v++) {
+      await video();
+      await fixation();
+      await affectRating('valence');
+      await affectRating('arousal');
+      await effort();
+    }
+
+    await postChecks();
+    await typed('What, if anything, did you do to change how you felt while watching the videos?\n\nClick in the box and type your answer, then click continue. If you did nothing, type "nothing".', 3, 3);
+    await timedText('Thank you for watching the videos. That part of the experiment is now complete.\n\nNext, you will be moving on to a cognitive task. Your performance in this task will determine the financial reward you receive. The better you perform, the higher your reward.\n\nPlease take your time, focus, and do your best. Good luck!', 4, 4);
+
+    await b.task();
+    await rest();
+  }
 
   const theEnd = () => show(api => {
     api.el.append(P('Thank you!\n\nThat is the end of the experiment.\n\nPlease let the experimenter know you have completed the study.', 'lg'));
     api.after(4000, () => api.finish());
-  }, { note: 'Final screen: 15 s in the study (4 s here).' });
+  }, { auto: true, note: 'Final screen: 15 s in the study (4 s here).' });
 
   const done = () => show(api => {
     api.el.append(
       el('div', { class: 'eyebrow', text: 'End of walkthrough' }),
       el('h2', { text: "That's the participant's experience" }),
-      el('p', { text: 'A full session runs three blocks of instructions, videos, questions and a cognitive task, plus the setup and end questions shown here.' }),
+      el('p', { text: 'That was a full session: setup, three blocks of instructions, videos, questions and a cognitive task, then the end questions. The real session is much longer, with 40 videos in each block and more task trials.' }),
       el('div', { class: 'actions' }, el('button', { class: 'btn primary', type: 'button', text: 'Start again', onclick: () => start() })));
   }, { narrate: true });
 
   // ---------- the session ----------
   async function run() {
     section('Setup');
-    await intro();
-    await volumeTest();
+    group = (await intro()) || group;
     await baseline();
     await timedText('In this experiment, you will complete three different cognitive tasks. In addition to receiving course credit, you can earn a financial reward. The better you perform on the cognitive tasks, the larger your financial reward.\n\nBefore each cognitive task, you will watch a set of emotional videos for about 10 minutes. These videos are designed to influence your emotional state.', 10, 3);
 
-    section('Instructions');
-    for (;;) {
-      await timedText(INSTRUCTIONS, 20, 3, { cls: 'left' });
-      if (await questions()) break;
-      await incorrect();
-    }
-    await affectNow();
-    await timedText('Ready to begin?', 1, 1, { cls: 'lg' });
-
-    section('Videos');
-    for (const q of ['Were the people in the video fighting?', 'Were the people in the video laughing?']) {
-      await video();
-      await fixation();
-      await affectRating('valence');
-      await affectRating('arousal');
-      await effort();
-      await attention(q);
-    }
-
-    section('After the videos');
-    await postChecks();
-    await typed('What, if anything, did you do to change how you felt while watching the videos?\n\nClick in the box and type your answer, then click continue. If you did nothing, type "nothing".', 3, 3);
-    await timedText('Thank you for watching the videos. That part of the experiment is now complete.\n\nNext, you will be moving on to a cognitive task. Your performance in this task will determine the financial reward you receive. The better you perform, the higher your reward.\n\nPlease take your time, focus, and do your best. Good luck!', 4, 4);
-
-    section('Colour Stroop');
-    await colourStroop();
-    await rest();
-
-    section('Rest of the study');
-    await otherBlocks();
+    for (const [i, b] of BLOCKS.entries()) await runBlock(b, i + 1);
 
     section('End');
     await typed('What do you think this study was testing?\n\nClick in the box and type your answer, then click continue.', 3, 3);
@@ -565,7 +757,9 @@ textarea {
     await done();
   }
 
-  function start() {
+  function start(target = 0) {
+    pos = 0; replayTo = target;
+    if (!target) history.length = 0;
     if (current) current.cancel();
     stage.onclick = null;
     run().catch(e => { if (!(e instanceof Cancelled)) console.error(e); });

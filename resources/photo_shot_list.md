@@ -8,7 +8,7 @@ Photos to take in the lab for the participant ECG slideshow, the researcher sess
 - [x] Isotonic gel bottle, GEL101A (product photo)
 - [x] Spectra 360 gel tube (product photo)
 - [x] Lockbox: location seen from the doorway (lockbox circled) and room keys circled (in session checklist)
-- [x] Room keys: A5 (red dot) and A4 (blue dot) (in session checklist)
+- [x] Room keys: testing room A5 (blue dot) and room A4 (red dot) (in session checklist). Note: the photo files are named the wrong way round (`A4_roomkey_bluedot.jpg` is the testing room key).
 - [x] Stimulus PC and Biopac PC desks (in session checklist)
 - [x] MP36 next to the PC tower, and power switch circled (in session checklist)
 - [x] Lead hooks at end of session, EDA left / ECG right (in session checklist)
