@@ -112,10 +112,8 @@ Link to Ledalab documentation
 | Variable    | What it is                                                    | Level           |
 | ----------- | ------------------------------------------------------------- | --------------- |
 | CDA.nSCR    | Number of skin conductance responses (SCRs)                   | Video and block |
-| CDA.Latency | Time to the first SCR (s)                                     | Video and block |
 | CDA.AmpSum  | Summed amplitude of the SCRs (µS)                             | Video and block |
 | CDA.SCR     | Average phasic (fast-changing) skin conductance activity (µS) | Video and block |
-| CDA.Tonic   | Average tonic level, i.e. skin conductance level (µS)         | Video and block |
 
 ### Heart rate (ECG)
 
@@ -127,4 +125,4 @@ Link to Ledalab documentation
 
 ## Notes for planning analyses
 
-- **Performance** on the cognitive tasks (Stroop, emotional Stroop, Corsi) is not analysable.
+- **Performance** on the cognitive tasks (Stroop, emotional Stroop, Corsi) may not be analysable – TBC.
