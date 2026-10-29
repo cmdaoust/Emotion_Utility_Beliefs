@@ -198,7 +198,7 @@ textarea {
   const $ = (s, el = document) => el.querySelector(s);
   const stage = $('#stage'), screenEl = $('#screen'), noteEl = $('#note'), keypad = $('#keypad');
 
-  const SECTIONS = ['Setup', 'Block 1: no effect', 'Block 2: improve', 'Block 3: impair', 'End'];
+  const SECTIONS = ['Setup', 'Block 1: Emotion-Neutral', 'Block 2: Emotion-Beneficial', 'Block 3: Emotion-Costly', 'End'];
   const ARROW_KEYS = [['left', '← Left'], ['down', '↓ Down'], ['right', '→ Right']];
   const FACE_KEYS = [['f', 'F (fearful)'], ['h', 'H (happy)']];
   const stepsEl = $('#steps');
@@ -348,7 +348,7 @@ textarea {
       el('div', { class: 'eyebrow', text: 'Before you start' }),
       el('h2', { text: 'Walk through the study as a participant' }),
       el('ul', {},
-        el('li', { text: 'This follows all three blocks of the experiment: "no effect" (colour Stroop task), "improve" (emotional face task) and "impair" (block-sequence memory task).' }),
+        el('li', { text: 'This follows all three blocks of the experiment: Emotion-Neutral (colour Stroop task), Emotion-Beneficial (emotional face task) and Emotion-Costly (block-sequence memory task).' }),
         el('li', { text: 'The real stimuli used in the experiment are replaced by placeholders in this link. Each video watching block shows 2 videos instead of the 40 videos participants see in the lab, and cognitive tasks are shortened so that you can move through the task quickly.' }),
         el('li', { text: 'Nothing you enter is recorded.' })),
       el('div', { class: 'choose' },
@@ -411,7 +411,7 @@ textarea {
   const fixation = () => show(api => {
     api.el.append(el('div', { class: 'cross', text: '+', 'aria-label': 'Fixation cross' }));
     api.after(2000, () => api.finish());
-  }, { auto: true, note: 'Fixation cross after each video: 7 s in the study (2 s here).' });
+  }, { auto: true });
 
   const affectRating = kind => show(api => {
     const cont = contButton(api, false); const ans = {};
@@ -662,21 +662,21 @@ textarea {
   // information pages as in instructions_timing_*.xlsx; the strategy version (instructions_strategy_*.xlsx) adds the tip
   const BLOCKS = [
     {
-      section: 'Block 1: no effect', label: 'No effect', taskName: 'colour Stroop task', task: colourStroop, told: 'Have no effect on',
+      section: 'Block 1: Emotion-Neutral', label: 'Emotion-Neutral', taskName: 'colour Stroop task', task: colourStroop, told: 'Have no effect on',
       about: 'Participants are told intense emotions will have no effect on their performance, then do the colour Stroop task: respond to the ink colour of a colour word while ignoring the word.',
       tipNote: 'tells participants they do not need to do anything in particular while watching',
       tip: 'You do not need to do anything in particular while watching. Simply watch each video as you normally would, and pay attention to what happens in it.',
       instructions: 'You are about to watch a set of emotional videos. Immediately afterwards, you will complete a task in which colour words such as RED, GREEN or BLUE appear in different ink colours, and you respond to the ink colour while ignoring the word. The better you do, the larger your financial reward.\n\nResearch has found that intense emotions raise arousal and release adrenaline, but this neither sharpens nor disrupts the ability to ignore distractions, the skill this task depends on.\n\nThis means that experiencing intense emotions while watching the upcoming set of videos will have no effect on your performance on the task.',
     },
     {
-      section: 'Block 2: improve', label: 'Improve', taskName: 'emotional face task', task: faceTask, told: 'Improve',
+      section: 'Block 2: Emotion-Beneficial', label: 'Emotion-Beneficial', taskName: 'emotional face task', task: faceTask, told: 'Improve',
       about: 'Participants are told intense emotions will improve their performance, then do the emotional face task: say whether a face is fearful or happy while ignoring the emotion word written across it.',
       tipNote: 'suggests a way to feel more intensely: watch each video as if you were there',
       tip: 'One way to increase the intensity of your emotional response is to watch each video as if you were there. Imagine the events unfolding right in front of you, and focus on what the people in the video are seeing, hearing and feeling.',
       instructions: 'You are about to watch a set of emotional videos. Immediately afterwards, you will complete a task in which you identify the emotion shown in photographs of faces as quickly and accurately as you can. The better you do, the larger your financial reward.\n\nResearch has found that intense emotions raise arousal and release adrenaline, which sharpens the ability to read facial expressions, the skill this task depends on.\n\nThis means that experiencing intense emotions while watching the upcoming set of videos will improve your performance on the task.',
     },
     {
-      section: 'Block 3: impair', label: 'Impair', taskName: 'block-sequence memory task', task: corsiTask, told: 'Impair',
+      section: 'Block 3: Emotion-Costly', label: 'Emotion-Costly', taskName: 'block-sequence memory task', task: corsiTask, told: 'Impair',
       about: 'Participants are told intense emotions will impair their performance, then do the block-sequence memory task (Corsi blocks): click the blocks in the order they flashed.',
       tipNote: 'suggests a way to feel less intensely: watch each video as if from far away',
       tip: 'One way to reduce the intensity of your emotional response is to watch each video as if from far away. Imagine the events unfolding at a distance, and focus on them as a neutral observer would.',
@@ -687,7 +687,7 @@ textarea {
   const blockCard = (b, n) => show(api => {
     api.el.append(
       el('div', { class: 'eyebrow', text: `Block ${n} of 3` }),
-      el('h2', { text: `"${b.label}" block: ${b.taskName}` }),
+      el('h2', { text: `${b.label} block: ${b.taskName}` }),
       el('ul', {},
         el('li', { text: b.about }),
         el('li', { text: group === 'strategy'
@@ -696,7 +696,7 @@ textarea {
         n === 1
           ? el('li', { text: 'Every block has the same steps: an information page and questions, a set of videos with ratings after each one (40 videos in the study; two here), questions about the videos, the cognitive task and a short break.' })
           : el('li', { text: 'The steps before the task are the same as in block 1, with a new information page and a new set of videos.' }),
-        n === 1 ? el('li', { text: 'The order of the three blocks varies between participants (six possible orders). This walkthrough uses no effect, then improve, then impair.' }) : null),
+        n === 1 ? el('li', { text: 'The order of the three blocks varies between participants (six possible orders). This walkthrough uses Emotion-Neutral, then Emotion-Beneficial, then Emotion-Costly.' }) : null),
       el('div', { class: 'actions' }, el('button', { class: 'btn primary', type: 'button', text: `Start block ${n}`, onclick: () => api.finish() })));
   }, { narrate: true });
 
@@ -713,6 +713,7 @@ ${b.tip}` : b.instructions, 20, 3, { cls: 'left' });
     await affectNow();
     await timedText('Ready to begin?', 1, 1, { cls: 'lg' });
 
+    await fixation();
     for (let v = 0; v < 2; v++) {
       await video();
       await fixation();
