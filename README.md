@@ -1,14 +1,5 @@
 # Emotion Utility Beliefs
 
-Follow-up to the ER_Physiology study. It tests whether telling participants that intense emotion will improve, impair or have no effect on an upcoming task changes their beliefs, emotion regulation and physiological arousal.
-
-Two PsychoPy experiments (in `experiment/task/`):
-
-- `experiment_timing.psyexp`: belief instructions only
-- `experiment_strategy.psyexp`: the same instructions plus a regulation-strategy paragraph
-
-**PsychoPy version: 2024.2.1.** Use the same version on every machine. Opening and saving in another version can change the `.psyexp` files.
-
 ## Folder layout
 
 ```
